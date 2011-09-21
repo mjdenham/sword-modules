@@ -1,0 +1,1 @@
+set path=%path%;C:\"Program Files"\CrossWire\sword-utilities-1.6.2

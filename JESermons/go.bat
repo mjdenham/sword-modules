@@ -14,5 +14,7 @@ copy jesermons.dat .\module\modules\genbook\rawgenbook\jesermons
 copy jesermons.idx .\module\modules\genbook\rawgenbook\jesermons
 copy jesermons.conf .\module\mods.d
 
-jar cvfM jesermons.zip -C module .
+cd module
+jar cvfM ../JESermons.zip  mods.d/jesermons.conf modules/genbook/rawgenbook/jesermons/jesermons.bdt modules/genbook/rawgenbook/jesermons/jesermons.dat modules/genbook/rawgenbook/jesermons/jesermons.idx
+cd ..
 rem zip a -r jesermons.zip module\*.*

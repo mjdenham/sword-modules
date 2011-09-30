@@ -16,6 +16,7 @@
 	<property name="andbible.lib.dir"  value="../../and-bible/AndBible/libs"/>
 	
 	<property name="xml2gbs"     location="C:/Program Files/CrossWire/sword-utilities-1.6.2/xml2gbs"/>
+	<property name="adb"     location="C:/datafiles/android-sdk-windows/platform-tools/adb"/>
 
 	<path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
@@ -23,6 +24,7 @@
     </path>
 
 	<property name="module.name"     value="JESermons"/>
+	<property name="module.name.lower" value="jesermons"/>
 	<property name="module.zipfile"  value="JESermons.zip"/>
 	<property name="sword.module.folder" value="modules/genbook/rawgenbook/jesermons"/>
 	
@@ -59,7 +61,7 @@
 	<target name="xml2gbs" depends="prepare-xml">
 		<exec executable="${xml2gbs}">
 			<arg value="jesermons.xml"/>
-			<arg value="${module.dir}/${module.name}"/>
+			<arg value="${module.dir}/${module.name.lower}"/>
 		</exec>
 	</target>
 
@@ -76,10 +78,18 @@
 		</tar>
 		<gzip destfile="${tar.gz.dir}/mods.d.tar.gz" src="${tar.gz.dir}/mods.d.tar"/>
 	</target>
-	
+
+	<target name="adb-push">
+		<exec executable="${adb}">
+			<arg value="push"/>
+			<arg path="/datafiles/andbib/projects4/sword-modules/JESermons/build/module/" />
+			<arg value="/mnt/sdcard/jsword/modules/genbook/rawgenbook/jesermons"/>
+		</exec>
+	</target>
+
     <target name="clean-build" depends="clean,compile"/>
 
-    <target name="main" depends="clean, prepare-xml, xml2gbs, zip-module, tar-gz-mods"/>
+    <target name="main" depends="clean, prepare-xml, xml2gbs, zip-module, tar-gz-mods, adb-push"/>
 
     <target name="jar" depends="compile">
         <mkdir dir="${jar.dir}"/>

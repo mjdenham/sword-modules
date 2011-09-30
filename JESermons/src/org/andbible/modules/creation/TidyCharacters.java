@@ -11,8 +11,10 @@ import org.crosswire.jsword.passage.PassageKeyFactory;
 
 public class TidyCharacters {
 
+	static Pattern hyphens = Pattern.compile( "^\\!(--)^\\>");  // 2 hyphens except if an xml comment
+
 	String filter(String in) {
 		// there a lot of double hyphens that confuse TTS
-		return in.replaceAll("--", "-");
+		return in.replaceAll("^\\!(--)^\\>", "-");
 	}
 }

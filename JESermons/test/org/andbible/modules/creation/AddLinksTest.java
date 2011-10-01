@@ -19,12 +19,14 @@ public class AddLinksTest {
 	@Test
 	public void simpleLinkTest() {
 		assertThat( links.filter("Deuteronomy 32:35"), equalTo("<reference osisRef=\"Deut.32.35\">Deuteronomy 32:35</reference>"));
+		assertThat( links.filter("Start Deuteronomy 32:35 End"), equalTo("Start <reference osisRef=\"Deut.32.35\">Deuteronomy 32:35</reference> End"));
 	}
 	
 	@Test
 	public void romanNumeralTest() {
 		assertThat( links.filter("Matt. xxv. 21"), equalTo("<reference osisRef=\"Matt.25.21\">Matthew 25:21</reference>"));
 		assertThat( links.filter("I. Thessalonians. ii. 3"), equalTo("<reference osisRef=\"1Thess.2.3\">1 Thessalonians 2:3</reference>"));
+		assertThat( links.filter("And Canticles ii. 15. \"The foxes"), equalTo("And <reference osisRef=\"Song.2.15\">Song of Solomon 2:15</reference> \"The foxes"));
 	}
 
 	@Test
@@ -36,7 +38,7 @@ public class AddLinksTest {
 		assertThat( links.filter("it. 1"), equalTo("it. 1"));
 		assertThat( links.filter("Core.2.1"), equalTo("Core.2.1"));
 	}
-
+	
 	@Test
 	public void lineWrapTest() {
 		String text = "The same is expressed, Psalm\n\t\t\t\t       73:18. \"Surely thou didst set them in slippery places; thou\n\t\t\t\t       castedst them down into destruction.\"";

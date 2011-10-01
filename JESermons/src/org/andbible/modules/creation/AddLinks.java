@@ -8,6 +8,7 @@ import org.crosswire.jsword.passage.Key;
 import org.crosswire.jsword.passage.PassageKeyFactory;
 
 public class AddLinks {
+	// reg exp derived from http://regexlib.com/REDetails.aspx?regexp_id=2288
 	// Deuteronomy 32:35
 	// Psalm 73:18,19
 	// 1 Corinthians 1:29, 30, 31
@@ -19,7 +20,11 @@ public class AddLinks {
 	static Pattern bibleRefPattern = Pattern.compile( "(?:(?:[123]|I{1,3}\\.?)\\s*)?"+  // number preceding book name e.g. 1 Cor, 2 Kings, 3 John
 											"(?:[A-Z][a-zA-Z]+|Song of Songs|Song of Solomon).?\\s+"+ // book
 											"((?:(?:1?[0-9]?[0-9])|(?:[clxviCLXVI]{1,7})))[:.]\\s*"+ // chapter using arabic or roman numerals
-											"\\d{1,3}(?:[,-]\\s*\\d{1,3})*(?:;\\s*(?:(?:[123]|I{1,3})\\s*)?(?:[A-Z][a-zA-Z]+|Song of Songs|Song of Solomon)?.?\\s*(?:1?[0-9]?[0-9]):\\s*\\d{1,3}(?:[,-]\\s*\\d{1,3})*)*");
+											"\\d{1,3}(?:[,-]\\s*\\d{1,3})*"+ // verse
+											"[.]?"+  // roman verse refs generally have a dot after the verse
+											// adding the below caters for references like II Ki. 2:11; 3:12-22
+											"(?:;\\s*"+							// I am not sure what the ; is doing here, but it precedes a possible repeated ref
+											"(?:(?:[123]|I{1,3})\\s*)?(?:1?[0-9]?[0-9]):\\s*\\d{1,3}(?:[,-]\\s*\\d{1,3})*)*");
 	
 	static Pattern removeChars = Pattern.compile("\\s");
 

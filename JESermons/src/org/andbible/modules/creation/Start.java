@@ -17,6 +17,7 @@ public class Start {
 			in = new InsertParagraphs().filter(in);
 			in = new AddLinks().filter(in);
 			in = new TidyCharacters().filter(in);
+			in = new CorrectCapitalization().filter(in);
 			IOUtils.write(in, new FileOutputStream("jesermons.xml"));
 		} catch (Exception e) {
 			e.printStackTrace();

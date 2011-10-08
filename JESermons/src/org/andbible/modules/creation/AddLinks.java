@@ -32,14 +32,7 @@ public class AddLinks {
 		Matcher m = bibleRefPattern.matcher(in);
 		StringBuffer retVal = new StringBuffer();
 		
-		int unmatchedStartPos = 0;
 		while (m.find()) {
-			int matchStart = m.start();
-			int matchEnd = m.end();
-			
-			// append text between matches
-			retVal.append(in.substring(unmatchedStartPos, matchStart));
-
 			String ref = m.group(0);
 			String chapter = m.group(1);
 
@@ -47,18 +40,14 @@ public class AddLinks {
 			String alteredRef = ref;
 			if (StringUtils.containsOnly(chapter.toLowerCase(), "clxvi")) {
 				String arabic = String.valueOf(Roman.toLong(chapter));
-				alteredRef = in.substring(matchStart, m.start(1))+arabic+in.substring(m.end(1), matchEnd);
+				alteredRef = in.substring(m.start(), m.start(1))+arabic+in.substring(m.end(1), m.end());
 			}
 			
-			retVal.append( processPossibleReference(alteredRef, ref) );
-
-			unmatchedStartPos = matchEnd;
+			m.appendReplacement(retVal, processPossibleReference(alteredRef, ref));
 		}
 		
 		// append any trailing space after the last match, or if no match then the whole string
-		if (unmatchedStartPos<in.length()) {
-			retVal.append(in.substring(unmatchedStartPos));
-		}
+		m.appendTail(retVal);
 
 		return retVal.toString();
 	}

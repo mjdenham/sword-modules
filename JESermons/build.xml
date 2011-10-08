@@ -1,4 +1,4 @@
-<project name="HelloWorld" basedir="." default="main">
+<project name="Build module" basedir="." default="main">
 
     <property name="src.dir"     value="src"/>
 

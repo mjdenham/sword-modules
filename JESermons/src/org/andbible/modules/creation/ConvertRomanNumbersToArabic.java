@@ -26,44 +26,24 @@ public class ConvertRomanNumbersToArabic {
 		Matcher m = patt.matcher(in);
 		StringBuffer retVal = new StringBuffer();
 		
-		int unmatchedStartPos = 0;
-
 		while (m.find()) {
-			int start = m.start();
-			int end = m.end();
-
-			// append text between matches
-			retVal.append(in.substring(unmatchedStartPos, start));
-
 			String ref = m.group(0);
 			// remove tabs and CRs because they confuse PassageKeyFactory
 			String tidiedRef = removeChars.matcher(ref).replaceAll(" ");
 			
 			// check if the part that matched the regexp is a valid bible reference
 			Key key = PassageKeyFactory.instance().getValidKey(tidiedRef); 
-			if (key.isEmpty()) {
-				// not a proper passage reference so just append the text
-				retVal.append(ref);
-			} else {
-				// valid ref found
+			if (!key.isEmpty()) {
+				// found a proper passage reference
 				String link = "<reference osisRef=\""+key.getOsisID()+"\">"+key.getName()+"</reference>";
 				System.out.println(tidiedRef+"->"+link);
-				retVal.append(link);
-//				// we removed all tabs and CRs so add one at end if there was one in original ref
-//				if (ref.contains("\n")) {
-//					retVal.append("\n");
-//				}
+				m.appendReplacement(retVal, link);
 			}
-
-			unmatchedStartPos = end;
 		}
 		
 		// append any trailing space after the last match, or if no match then the whole string
-		if (unmatchedStartPos<in.length()) {
-			retVal.append(in.substring(unmatchedStartPos));
-		}
+		m.appendTail(retVal);
 
-		String out;
 		return retVal.toString();
 	}
 	

@@ -13,24 +13,13 @@ public class InsertParagraphs {
 		Matcher m = blankLinePattern.matcher(in);
 		StringBuffer retVal = new StringBuffer();
 		
-		int unmatchedStartPos = 0;
-
 		while (m.find()) {
-			int start = m.start();
-			int end = m.end();
-
-			// append text between matches
-			retVal.append(in.substring(unmatchedStartPos, start));
 			// replace empty line
-			retVal.append(replacement);
-
-			unmatchedStartPos = end;
+			m.appendReplacement(retVal,  replacement);
 		}
 		
 		// append any trailing space after the last match, or if no match then the whole string
-		if (unmatchedStartPos<in.length()) {
-			retVal.append(in.substring(unmatchedStartPos));
-		}
+		m.appendTail(retVal);
 
 		return retVal.toString();
 	}

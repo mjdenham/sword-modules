@@ -12,28 +12,17 @@ public class CorrectCapitalization {
 		Matcher m = capitalsPattern.matcher(in);
 		StringBuffer retVal = new StringBuffer();
 		
-		int unmatchedStartPos = 0;
 		while (m.find()) {
-			int matchStart = m.start();
-			int matchEnd = m.end();
-			
-			// append text between matches
-			retVal.append(in.substring(unmatchedStartPos, matchStart));
-
 			String capitals = m.group(0);
 			String mixedCase =WordUtils.capitalizeFully(capitals);
 			
 			System.out.println("Capitalized:"+capitals+" TO:"+mixedCase);
 			
-			retVal.append( mixedCase );
-
-			unmatchedStartPos = matchEnd;
+			m.appendReplacement(retVal, mixedCase );
 		}
 		
 		// append any trailing space after the last match, or if no match then the whole string
-		if (unmatchedStartPos<in.length()) {
-			retVal.append(in.substring(unmatchedStartPos));
-		}
+		m.appendTail(retVal);
 
 		return retVal.toString();
 	}

@@ -7,11 +7,13 @@ package org.andbible.modules.creation;
  */
 public class TidyCharacters {
 
-	String filter(String in) {
+	public String filter(String in) {
 		// there a lot of double hyphens that confuse TTS but don't remove them from xml comments
-		return 	in.replaceAll("'em", "them") 
-				 .replaceAll("&c;", "etc.")
-				 .replaceAll("&c", "etc.");
-		//in.replaceAll("([^!])--([^>])", "$1-$2")
+		return in.replaceAll("&c;", "etc.")
+				 .replaceAll("&c", "etc.")
+				 .replaceAll("'em", "them");
+		
+//		.replaceAll("([^!])--([^>])", "$1-$2")
+		 
 	}
 }

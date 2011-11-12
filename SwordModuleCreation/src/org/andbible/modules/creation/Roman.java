@@ -1,6 +1,8 @@
 //$Id: Roman.java,v 1.11 2001/01/07 15:12:00 benc Exp $
 package org.andbible.modules.creation;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * <p>
  * This NumberFormat converts long integers to and from Roman Numeral notation.
@@ -62,6 +64,11 @@ public class Roman {
 	 */
 
 	public static long toLong(String s) {
+		// ensure the number is not already in Arabic numerals
+		if (StringUtils.isNumeric(s)) {
+			return Long.valueOf(s);
+		}
+		
 		long tot = 0, max = 0;
 		char ch[] = s.toUpperCase().toCharArray();
 		int i, p;

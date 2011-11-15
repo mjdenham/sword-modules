@@ -25,10 +25,11 @@ public class InsertParts {
 			String part = m.group(1);
 			String title = m.group(2);
 			long partNo = Roman.toLong(part);
+			String safeTitle = title.replace(",", "");
 			// replace empty line
 			System.out.println("Part:"+partNo+" Title:"+title);
 			
-			String newText = MessageFormat.format(replacement, "Part "+partNo+" "+title, title);
+			String newText = MessageFormat.format(replacement, "Part "+partNo+" "+safeTitle, title);
 			System.out.println(newText);
 			
 			m.appendReplacement(retVal,  newText);

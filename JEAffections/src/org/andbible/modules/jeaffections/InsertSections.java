@@ -36,7 +36,7 @@ public class InsertSections {
 				partNumber++;
 			}
 			lastSection = sectionNo;
-			String osisId = partNumber+"."+sectionNo;
+			String osisId = partNumber+"_"+sectionNo;
 
 			System.out.println("Section "+osisId);
 			

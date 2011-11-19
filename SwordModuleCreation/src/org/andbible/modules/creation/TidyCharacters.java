@@ -11,6 +11,7 @@ public class TidyCharacters {
 		// there a lot of double hyphens that confuse TTS but don't remove them from xml comments
 		return in.replaceAll("&c;", "etc.")
 				 .replaceAll("&c", "etc.")
+				 .replaceAll("\\s*_{10,}\\n", "") // remove any remaining lines of underscores
 				 .replaceAll("'em", "them");
 		
 //		.replaceAll("([^!])--([^>])", "$1-$2")

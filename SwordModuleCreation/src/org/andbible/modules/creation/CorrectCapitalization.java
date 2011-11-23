@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.WordUtils;
 
 public class CorrectCapitalization {
-	static Pattern capitalsPattern = Pattern.compile( "([A-Z][A-Z \t']{3,100}[A-Z])|THE");
+	static Pattern capitalsPattern = Pattern.compile( "([A-Z][A-Z \t']{3,100}[A-Z])|THE|ONE|SIN");
 	
 	public String filter(String in) {
 		Matcher m = capitalsPattern.matcher(in);

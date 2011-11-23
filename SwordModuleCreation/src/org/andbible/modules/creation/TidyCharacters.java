@@ -12,6 +12,8 @@ public class TidyCharacters {
 		return in.replaceAll("&c;", "etc.")
 				 .replaceAll("&c", "etc.")
 				 .replaceAll("\\s*_{10,}\\n", "") // remove any remaining lines of underscores
+				 .replaceAll("([?;,!])--", "$1 ")
+				 .replaceAll("([\\w\">])--([\\w\"<])", "$1 -- $2") // put spaces around double hyphens
 				 .replaceAll("'em", "them");
 		
 //		.replaceAll("([^!])--([^>])", "$1-$2")

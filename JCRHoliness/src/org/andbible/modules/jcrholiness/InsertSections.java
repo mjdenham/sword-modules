@@ -16,7 +16,7 @@ public class InsertSections {
 	static Pattern partHeadingPattern = Pattern.compile( "\\s*_{10,}\\n"+ 	// line of underscores with space at start
 														 "\\n"+			// empty line
 														 "\\s*([IVXLC]+)[\\.]?\\n"+  // Section I, II, III, ...
-														 "\\s*([A-Za-z ]+)\\n"	// chapter title
+														 "\\s*([A-Za-z\"\'? ]+)\\n"	// chapter title
 														);
 	static String replacement = "\n</p>\n</div>\n<div type=\"chapter\" osisID=\"{0}\">\n<title>{1}</title>\n<p>";
 

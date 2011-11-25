@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <osis xsi:schemaLocation="http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.2.1.1.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace">
-	<osisText osisRefWork="book" xml:lang="en" osisIDWork="ReligiousAffections">
+	<osisText osisRefWork="book" xml:lang="en" osisIDWork="Holiness">
 		<header>
 			<work osisWork="Holiness">
 				<title>Holiness: Its Nature, Hindrances, Difficulties, and Roots</title>
@@ -9792,7 +9792,7 @@ THE RULER OF THE WAVES
    "And there arose a great storm of wind, and the waves beat into the
    ship, so that it was now full.
 
-   "And He was in the hinder part of the ship, asleep on a pi How: and
+   "And He was in the hinder part of the ship, asleep on a pillow: and
    they awake Him, and say unto Him, Master, carest Thou not that we
    perish?
 
@@ -9858,7 +9858,7 @@ THE RULER OF THE WAVES
    deep instruction. Come now, and let us examine what we are meant to
    learn.
 
-   1. Let us learn, first of all, that following Christ mil not prevent
+   1. Let us learn, first of all, that following Christ will not prevent
    our having earthly sorrows and troubles.
 
    Here are the chosen disciples of the Lord Jesus in great anxiety. The
@@ -13538,7 +13538,7 @@ THIRST RELIEVED
    peace by believing."--Robert Traill's works, 1696. Vol. I, 266-269.
      __________________________________________________________________
 
-XVIII/
+XVIII.
 "UNSEARCHABLE RICHES"
 
    "Unto me, who am less than the least of all saints, is this grace

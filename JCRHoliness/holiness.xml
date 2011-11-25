@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <osis xsi:schemaLocation="http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.2.1.1.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace">
-	<osisText osisRefWork="book" xml:lang="en" osisIDWork="ReligiousAffections">
+	<osisText osisRefWork="book" xml:lang="en" osisIDWork="Holiness">
 		<header>
 			<work osisWork="Holiness">
 				<title>Holiness: Its Nature, Hindrances, Difficulties, and Roots</title>
@@ -1248,7 +1248,7 @@ J. C. RYLE, D.D.
 <p>
    "Sanctify them through Thy truth." -- <reference osisRef="John.17.17">John 17:17</reference>
 				</p><p>
-   "This is the will of God, even jour sanctification." -- <reference osisRef="1Thess.4.3">1 Thessalonians 4:3</reference>
+   "This is the will of God, even your sanctification." -- <reference osisRef="1Thess.4.3">1 Thessalonians 4:3</reference>
 				</p><p>
    The subject of sanctification is one which many, I fear, dislike
    exceedingly. Some even turn from it with scorn and disdain. The very
@@ -9022,9 +9022,10 @@ J. C. RYLE, D.D.
    nature; and under what reproach did he die!" (He was hanged for
    forgery.) Venn's Life and Letters, p. 238. Edit. 1853.
 </p>
-<p>XI.
-Christ's Greatest Trophy
-				</p><p>
+</div>
+<div type="chapter" osisID="11 Christ's Greatest Trophy">
+<title>11 Christ's Greatest Trophy</title>
+<p>
    "And one of the malefactors which were hanged railed on Him, saying, If
    Thou be Christ, save Thyself and us.
 				</p><p>
@@ -9706,7 +9707,7 @@ Christ's Greatest Trophy
    "And there arose a great storm of wind, and the waves beat into the
    ship, so that it was now full.
 				</p><p>
-   "And He was in the hinder part of the ship, asleep on a pi How: and
+   "And He was in the hinder part of the ship, asleep on a pillow: and
    they awake Him, and say unto Him, Master, carest Thou not that we
    perish?
 				</p><p>
@@ -9772,7 +9773,7 @@ Christ's Greatest Trophy
    deep instruction. Come now, and let us examine what we are meant to
    learn.
 				</p><p>
-   1. Let us learn, first of all, that following Christ mil not prevent
+   1. Let us learn, first of all, that following Christ will not prevent
    our having earthly sorrows and troubles.
 				</p><p>
    Here are the chosen disciples of the Lord Jesus in great anxiety. The
@@ -11716,9 +11717,10 @@ Christ's Greatest Trophy
    this way, and the Spirit's word to the Churches will not have been
    spoken to us in vain.
 </p>
-<p>XV.
-"Lovest Thou Me?"
-				</p><p>
+</div>
+<div type="chapter" osisID="15 "Lovest Thou Me?"">
+<title>15 "Lovest Thou Me?"</title>
+<p>
    "Lovest thou Me?" -- <reference osisRef="John.21.16">John 21:16</reference>
 				</p><p>
    The question which heads this paper was addressed by Christ to the
@@ -13428,9 +13430,10 @@ Christ's Greatest Trophy
    Gospel, the Lord will (as He hath often done) convey faith, and joy and
    peace by believing." -- Robert Traill's works, 1696. Vol. I, 266-269.
 </p>
-<p>Xviii/
-"Unsearchable Riches"
-				</p><p>
+</div>
+<div type="chapter" osisID="18 "Unsearchable Riches"">
+<title>18 "Unsearchable Riches"</title>
+<p>
    "Unto me, who am less than the least of all saints, is this grace
    given, that I should preach among the Gentiles the unsearchable riches
    of Christ." <reference osisRef="Eph.3.8">Ephesians 3:8</reference>
@@ -14733,9 +14736,10 @@ Christ's Greatest Trophy
    Church of England. The Churchman who walks in these lines, I believe,
    is the Churchman who "understands the times."
 </p>
-<p>XX.
-"Christ Is All"
-				</p><p>
+</div>
+<div type="chapter" osisID="20 "Christ Is All"">
+<title>20 "Christ Is All"</title>
+<p>
    "Christ is all." -- <reference osisRef="Col.3.11">Colossians 3:11</reference>
 				</p><p>
    The words of the text which heads this page are few, short, and soon

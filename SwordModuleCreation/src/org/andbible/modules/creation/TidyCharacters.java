@@ -12,7 +12,7 @@ public class TidyCharacters {
 		return in.replaceAll("&c;", "etc.")
 				 .replaceAll("&c", "etc.")
 				 .replaceAll("\\s*_{10,}\\n", "") // remove any remaining lines of underscores
-				 .replaceAll("([?;,!])--", "$1 ")
+				 .replaceAll("([?;,!.:])--", "$1 ")  // if '--' comes directly after punctuation then remove it
 				 .replaceAll("([\\w\">])--([\\w\"<])", "$1 -- $2") // put spaces around double hyphens
 				 .replaceAll("'em", "them");
 		

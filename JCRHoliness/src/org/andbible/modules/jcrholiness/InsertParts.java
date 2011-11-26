@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.andbible.modules.creation.OSISHelper;
 import org.andbible.modules.creation.Roman;
 
 public class InsertParts {
@@ -19,7 +20,7 @@ public class InsertParts {
 		
 		while (m.find()) {
 			String title = m.group(1);
-			String safeTitle = title.replace(",", "");
+			String safeTitle = OSISHelper.getValidOsisId(title);
 			// replace empty line
 			System.out.println(" Title:"+title);
 			

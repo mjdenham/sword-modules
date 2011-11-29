@@ -7,6 +7,7 @@ public class OSISHelper {
 		return text .replace(",", "")
 					.replace(" - ", " ")
 					.replace("'", "")
+					.replace("?", "")
 					.replace("\"", "")
 					.replaceAll("<reference.*>(.*)</reference>", "$1");
 

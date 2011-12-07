@@ -94,7 +94,7 @@
 
 	<target name="clean-build" depends="clean,compile"/>
 
-    <target name="main" depends="clean, prepare-xml, xml2gbs, zip-module, tar-gz-mods, adb-push"/>
+    <target name="main" depends="clean, prepare-xml, xml2gbs, zip-module, tar-gz-mods"/>
 
     <target name="jar" depends="compile">
         <mkdir dir="${jar.dir}"/>

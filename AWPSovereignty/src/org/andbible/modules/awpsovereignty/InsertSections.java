@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.andbible.modules.creation.OSISHelper;
 import org.andbible.modules.creation.Roman;
 
 public class InsertSections {
@@ -29,7 +30,7 @@ public class InsertSections {
 			String title = m.group(2);
 			long sectionNo = Roman.toLong(section);
 
-			String osisId = sectionNo+" "+title;
+			String osisId = OSISHelper.getValidOsisId(sectionNo+" "+title);
 
 			System.out.println("Section "+osisId);
 			

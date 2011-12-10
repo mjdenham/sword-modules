@@ -1,0 +1,108 @@
+<project name="Build JOGlory" basedir="." default="main">
+
+    <property name="src.dir"     value="src;../SwordModuleCreation/src"/>
+
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="module.dir"  value="${build.dir}/module"/>
+	<property name="mods.d.dir" value="module/mods.d"/>
+
+	<property name="distribution.dir"  value="${build.dir}/distribution"/>
+    <property name="tar.gz.dir"  value="${build.dir}/tar.gz"/>
+
+    <property name="main-class"  value="org.andbible.modules.joglory.Start"/>
+
+	<property name="lib.dir"     value="libs"/>
+	<property name="andbible.lib.dir"  value="../../and-bible/AndBible/libs"/>
+	
+	<property name="xml2gbs"     location="C:/Program Files/CrossWire/sword-utilities-1.6.2/xml2gbs"/>
+	<property name="adb"     location="C:/datafiles/android-sdk-windows/platform-tools/adb"/>
+
+	<path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+        <fileset dir="${andbible.lib.dir}" includes="**/*.jar"/>
+    </path>
+
+	<property name="module.name"     value="JOGlory"/>
+	<property name="module.name.lower" value="joglory"/>
+	<property name="module.zipfile"  value="${module.name}.zip"/>
+	<property name="sword.module.folder" value="modules/genbook/rawgenbook/${module.name.lower}"/>
+	
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    	<mkdir dir="${build.dir}"/>
+    	<mkdir dir="${classes.dir}"/>
+    	<mkdir dir="${module.dir}"/>
+    	<mkdir dir="${distribution.dir}"/>
+    	<mkdir dir="${tar.gz.dir}"/>
+    </target>
+    	<!--
+    	To create a compressed one I do: 
+    	        mkdir -p modules/texts/ztext/kjv2006 
+    	        osis2mod modules/texts/ztext/kjv2006 kjv.xml 0 2 4 
+    	        zip kjv2006.zip mods.d/kjv2006.conf modules/texts/ztext/kjv2006/*
+    	        http://sword-dev.350566.n4.nabble.com/Create-a-module-Where-is-xml2gbs-td351447.html 
+-->
+    	
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+    </target>
+
+    <target name="prepare-xml" depends="compile">
+        <java classname="${main-class}">
+        	<classpath>
+                <path refid="classpath"/>
+                <path location="${classes.dir}"/>
+            </classpath>
+        </java>
+    </target>
+	
+	<target name="xml2gbs" depends="prepare-xml">
+		<exec executable="${xml2gbs}">
+			<arg value="${module.name}.xml"/>
+			<arg value="${module.dir}/${module.name.lower}"/>
+		</exec>
+	</target>
+
+	<target name="zip-module" depends="xml2gbs">
+		<zip destfile="${distribution.dir}/${module.zipfile}" filesonly="true">
+			<zipfileset dir="${module.dir}" prefix="${sword.module.folder}"/>
+			<zipfileset dir="${mods.d.dir}" prefix="mods.d"/>
+		</zip>
+	</target>
+	
+	<target name="tar-gz-mods">
+		<tar destfile="${tar.gz.dir}/mods.d.tar">
+			<zipfileset dir="${mods.d.dir}" prefix="mods.d"/>
+		</tar>
+		<gzip destfile="${tar.gz.dir}/mods.d.tar.gz" src="${tar.gz.dir}/mods.d.tar"/>
+	</target>
+
+	<target name="adb-push">
+		<exec executable="${adb}">
+			<arg value="push"/>
+			<arg path="/datafiles/andbib/projects4/sword-modules/${module.name}/build/module/" />
+			<arg value="/mnt/sdcard/jsword/modules/genbook/rawgenbook/${module.name.lower}"/>
+		</exec>
+		<exec executable="${adb}">
+			<arg value="push"/>
+			<arg path="/datafiles/andbib/projects4/sword-modules/${module.name}/module/mods.d/${module.name.lower}.conf" />
+			<arg value="/mnt/sdcard/jsword/mods.d"/>
+		</exec>
+	</target>
+
+	<target name="clean-build" depends="clean,compile"/>
+
+    <target name="main" depends="clean, prepare-xml, xml2gbs, zip-module, tar-gz-mods, adb-push"/>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+</project>

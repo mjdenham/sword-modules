@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.andbible.modules.creation.OSISHelper;
+import org.andbible.modules.creation.OldeEnglishModerniser;
 import org.andbible.modules.creation.Roman;
 
 public class InsertSections {
@@ -33,6 +34,8 @@ public class InsertSections {
 			if (m.group(3)!=null) {
 				title += " "+m.group(3).trim();
 			}
+			// modernize here to prevent addition of <note/> in OSISId and title later 
+			title = new OldeEnglishModerniser().filter(title,  false);
 
 			String osisId = OSISHelper.getValidOsisId(section+" "+title);
 

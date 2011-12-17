@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.andbible.modules.creation.OSISHelper;
+import org.andbible.modules.creation.OldeEnglishModerniser;
 import org.apache.commons.lang.StringUtils;
 
 public class InsertParts {
@@ -21,6 +22,10 @@ public class InsertParts {
 		while (m.find()) {
 			String title = m.group(1).replace("\n", " - ");
 			title = StringUtils.removeEnd(title, " - ");
+
+			// modernize here to prevent addition of <note/> in OSISId and title later 
+			title = new OldeEnglishModerniser().filter(title,  false);
+
 			String safeTitle = OSISHelper.getValidOsisId(title);
 			// replace empty line
 			System.out.println(" Title:"+title);

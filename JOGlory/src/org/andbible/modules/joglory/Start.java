@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import org.andbible.modules.creation.AddLinks;
 import org.andbible.modules.creation.CorrectCapitalization;
 import org.andbible.modules.creation.InsertParagraphs;
+import org.andbible.modules.creation.OldeEnglishModerniser;
 import org.andbible.modules.creation.TidyCharacters;
 import org.apache.commons.io.IOUtils;
 
@@ -19,6 +20,7 @@ public class Start {
 			in = new RemoveSeparatorLines().filter(in);
 			in = new InsertParagraphs().filter(in);
 			in = new AddLinks().filter(in);
+			in = new OldeEnglishModerniser().filter(in, true);
 			in = new TidyCharacters().filter(in);
 			in = new CorrectCapitalization().filter(in);
 			IOUtils.write(in, new FileOutputStream("JOGlory.xml"));

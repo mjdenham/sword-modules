@@ -5,10 +5,13 @@ public class OSISHelper {
 	 */
 	public static String getValidOsisId(String text) {
 		return text .replace(",", "")
+					.replace(".", "")
 					.replace(" - ", " ")
+					.replace(" -- ", " ")
 					.replace("'", "")
 					.replace("?", "")
 					.replace("\"", "")
+					.replace(";", "")
 					.replaceAll("<reference.*>(.*)</reference>", "$1");
 
 	}

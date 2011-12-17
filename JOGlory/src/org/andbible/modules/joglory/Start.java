@@ -10,6 +10,11 @@ import org.andbible.modules.creation.OldeEnglishModerniser;
 import org.andbible.modules.creation.TidyCharacters;
 import org.apache.commons.io.IOUtils;
 
+/**
+ * convert simple text to Sword Gen Book
+ * @author denha1m
+ *
+ */
 public class Start {
 	
 	public static void main(String[] args) {

@@ -1,8 +1,7 @@
 package org.andbible.modules.creation;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -26,27 +25,32 @@ conjunction -> union
  */
 public class OldeEnglishModerniser {
 	
-	private static Map<String, String> mapOldToModernWord;
+	private static List<OldAndModern> oldAndModernWordList;
 	
 	static {
-		mapOldToModernWord = new HashMap<String, String>();
-		mapOldToModernWord.put("howbeit", "nevertheless");
-		mapOldToModernWord.put("saith", "says");
-		mapOldToModernWord.put("hereof", "of this");
-		mapOldToModernWord.put("herein", "in this");
-		mapOldToModernWord.put("therein", "in that");
-		mapOldToModernWord.put("thereon", "upon that");
-		mapOldToModernWord.put("whereof", "of which");
-		mapOldToModernWord.put("thereof", "of that");
-		mapOldToModernWord.put("wherewith", "with what");
-		mapOldToModernWord.put("wherefore", "therefore");
-		mapOldToModernWord.put("unto", "to");
-		mapOldToModernWord.put("hath", "has");
-		mapOldToModernWord.put("from whence", "from where");
-		mapOldToModernWord.put("whence", "from where");
-		mapOldToModernWord.put("whereunto", "to which");
-		mapOldToModernWord.put("hereunto", "to this");
-		mapOldToModernWord.put("conjunction", "union");
+		oldAndModernWordList = new ArrayList<OldAndModern>();
+		oldAndModernWordList.add(new OldAndModern("howbeit", "nevertheless"));
+		oldAndModernWordList.add(new OldAndModern("saith", "says"));
+		oldAndModernWordList.add(new OldAndModern("doth", "does"));
+		oldAndModernWordList.add(new OldAndModern("herein", "in this"));
+		oldAndModernWordList.add(new OldAndModern("hereof", "of this"));
+		oldAndModernWordList.add(new OldAndModern("hereunto", "to this"));
+		oldAndModernWordList.add(new OldAndModern("therein", "in that"));
+		oldAndModernWordList.add(new OldAndModern("thereof", "of that"));
+		oldAndModernWordList.add(new OldAndModern("thereon", "upon that"));
+		oldAndModernWordList.add(new OldAndModern("wherein", "in which"));
+		oldAndModernWordList.add(new OldAndModern("whereof", "of which"));
+		oldAndModernWordList.add(new OldAndModern("wherewith", "with which"));
+		oldAndModernWordList.add(new OldAndModern("wherefore", "therefore"));
+		oldAndModernWordList.add(new OldAndModern("whereunto", "to which"));
+		oldAndModernWordList.add(new OldAndModern("whereby", "through which"));
+		oldAndModernWordList.add(new OldAndModern("unto", "to"));
+		oldAndModernWordList.add(new OldAndModern("hath", "has"));
+		
+		oldAndModernWordList.add(new OldAndModern("whence", "from where"));
+		oldAndModernWordList.add(new OldAndModern("from from", "", "from")); // whence is sometimes already preceded by 'from' so remove 'from from' caused by previous replacement
+		
+		oldAndModernWordList.add(new OldAndModern("conjunction", "union"));
 		
 		String[] REMOVE_ETH_ADD_S = new String[] {
 				"claspeth","knoweth","worketh","soaketh","belongeth","showeth","manifesteth","comprehendeth","profiteth","exhibiteth","dwelleth","inhabiteth",
@@ -54,7 +58,7 @@ public class OldeEnglishModerniser {
 				"proceedeth","bringeth","bloweth","listeth","aimeth","heareth","discerneth","healeth","redeemeth","crowneth","expecteth","findeth"
 			};
 		for (String old : REMOVE_ETH_ADD_S) {
-			mapOldToModernWord.put(old, old.substring(0, old.length()-3)+"s");
+			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"s"));
 		}
 
 		String[] REMOVE_ETH_ADD_ES = new String[] {
@@ -65,18 +69,19 @@ public class OldeEnglishModerniser {
 				"forgiveth","satisfieth","enlargeth","flourisheth","loatheth","promiseth","includeth","changeth"
 			};
 		for (String old : REMOVE_ETH_ADD_ES) {
-			mapOldToModernWord.put(old, old.substring(0, old.length()-3)+"es");
+			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"es"));
 		}
 
-		mapOldToModernWord.put("sitteth", "sits");
+		oldAndModernWordList.add(new OldAndModern("sitteth", "sits"));
 	}
 
 	public String filter(String in, boolean addNote) {
 		
-		for (Entry<String, String> oldToModern : mapOldToModernWord.entrySet()) {
-			String old = oldToModern.getKey();
-			String modern = oldToModern.getValue();
-			String note = addNote ? "<note n=\""+old+"\">Auto-modernized</note>" : "";
+		for (OldAndModern oldAndModern : oldAndModernWordList) {
+			String old = oldAndModern.old;
+			String modern = oldAndModern.modern;
+			String noteWord = oldAndModern.note;
+			String note = addNote && StringUtils.isNotEmpty(noteWord) ? "<note n=\""+noteWord+"\">Auto-modernized</note>" : "";
 			in = in.replaceAll("\\b"+old+"\\b", modern+note);
 			in = in.replaceAll("\\b"+StringUtils.capitalize(old)+"\\b", StringUtils.capitalize(modern)+note);
 		}
@@ -86,5 +91,20 @@ public class OldeEnglishModerniser {
 		return in;
 	}
 	
-	
+	private static class OldAndModern{
+		private String old;
+		private String modern;
+		private String note;
+
+		public OldAndModern(String old, String modern) {
+			this.old = old;
+			this.modern = modern;
+			this.note = old;
+		}
+		public OldAndModern(String old, String note, String modern) {
+			this.old = old;
+			this.note = note;
+			this.modern = modern;
+		}
+	}	
 }

@@ -1,0 +1,43 @@
+<project name="Build module catalog" basedir="." default="main">
+
+    <property name="src.dir"     value="src;../SwordModuleCreation/src"/>
+
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="module.dir"  value="${build.dir}/module"/>
+	<property name="mods.d.dir" value="module/mods.d"/>
+
+	<property name="distribution.dir"  value="${build.dir}/distribution"/>
+    <property name="tar.gz.dir"  value="${build.dir}/tar.gz"/>
+
+    <property name="main-class"  value="org.andbible.modules.joglory.Start"/>
+
+	<property name="lib.dir"     value="libs"/>
+	<property name="andbible.lib.dir"  value="../../and-bible/AndBible/libs"/>
+	
+	<property name="xml2gbs"     location="C:/Program Files/CrossWire/sword-utilities-1.6.2/xml2gbs"/>
+	<property name="adb"     location="C:/datafiles/android-sdk-windows/platform-tools/adb"/>
+
+	<path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+        <fileset dir="${andbible.lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    	<mkdir dir="${build.dir}"/>
+    	<mkdir dir="${tar.gz.dir}"/>
+    </target>
+
+	<target name="tar-gz-mods">
+		<tar destfile="${tar.gz.dir}/mods.d.tar">
+			<zipfileset dir="${mods.d.dir}" prefix="mods.d"/>
+		</tar>
+		<gzip destfile="${tar.gz.dir}/mods.d.tar.gz" src="${tar.gz.dir}/mods.d.tar"/>
+	</target>
+
+	<target name="clean-build" depends="clean,tar-gz-mods"/>
+
+    <target name="main" depends="clean, tar-gz-mods"/>
+
+</project>

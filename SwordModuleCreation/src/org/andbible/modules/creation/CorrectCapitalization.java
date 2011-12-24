@@ -14,11 +14,15 @@ public class CorrectCapitalization {
 		
 		while (m.find()) {
 			String capitals = m.group(0);
-			String mixedCase =WordUtils.capitalizeFully(capitals);
-			
-			System.out.println("Capitalized:"+capitals+" TO:"+mixedCase);
-			
-			m.appendReplacement(retVal, mixedCase );
+			if (!Roman.isRoman(capitals)) {
+				String mixedCase =WordUtils.capitalizeFully(capitals);
+				
+				System.out.println("Capitalized:"+capitals+" TO:"+mixedCase);
+				
+				m.appendReplacement(retVal, mixedCase );
+			} else {
+				m.appendReplacement(retVal, capitals );
+			}
 		}
 		
 		// append any trailing space after the last match, or if no match then the whole string

@@ -118,4 +118,8 @@ public class Roman {
 		}
 		return s;
 	}
+	
+	public static boolean isRoman(String s) {
+		return s.toUpperCase().matches("[IVXLCDM]*");
+	}
 }

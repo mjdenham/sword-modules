@@ -1,7 +1,12 @@
 package org.andbible.modules.creation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -27,6 +32,26 @@ public class OldeEnglishModerniser {
 	
 	private static List<OldAndModern> oldAndModernWordList;
 	
+	private static String[] REMOVE_ETH_ADD_S = new String[] {
+			"belongeth","claspeth","concerneth","containeth","delighteth","falleth","followeth","hasteneth","joyeth","knoweth","lighteth","rejecteth","reneweth","resteth","soaketh","showeth","trusteth","worketh","manifesteth","comprehendeth","profiteth","exhibiteth","dwelleth","inhabiteth",
+			"asketh","thirsteth","longeth","existeth","designeth","looketh","differeth","consisteth","aboundeth","groaneth","standeth","panteth","subsisteth",
+			"proceedeth","bringeth","bloweth","listeth","aimeth","heareth","discerneth","healeth","redeemeth","crowneth","expecteth","findeth",
+			"assigneth","calleth","casteth","commendeth","exceedeth","exerteth","faileth","feeleth","honoureth","insisteth","intendeth","keepeth","mindeth",
+			"ordereth","prayeth","quickeneth","reigneth","remaineth","speaketh","suffereth","suiteth","understandeth","upholdeth",
+		};
+	
+	private static String[] REMOVE_ETH_ADD_ES = new String[] {
+			"amazeth","ariseth","chooseth","cometh","confesseth","continueth","declareth","desireth","dieth","discourseth","distinguisheth","doeth","embraceth","fixeth","goeth",
+			"perplexeth","presseth","produceth","professeth","rejoiceth","requireth","urgeth","perisheth","lieth","receiveth","conduceth","taketh",
+			"passeth","maketh","shineth","expresseth","reproacheth","loveth","liveth","abideth","humbleth","causeth","giveth","loseth","testifieth","becometh",
+			"carrieth","reduceth","ceaseth","pleaseth","sanctifieth","ravisheth","communicateth","teacheth","hideth","refresheth","riseth",
+			"extinguisheth","proposeth","opposeth","compriseth","promoteth","seduceth","supplieth","wisheth","refuseth","increaseth","surpriseth","intermeddleth",
+			"forgiveth","satisfieth","enlargeth","flourisheth","loatheth","promiseth","includeth","changeth","undertaketh",
+			"accuseth","acknowledgeth","assumeth","believeth","chargeth","commenceth","deceiveth","denieth","describeth","deserveth","disposeth","engageth","evidenceth",
+			"exerciseth","exposeth","insinuateth","judgeth","leaveth","pitieth","placeth","proveth","raiseth","reacheth","searcheth","settleth","sufficeth","supposeth",
+		};
+
+	
 	static {
 		oldAndModernWordList = new ArrayList<OldAndModern>();
 		oldAndModernWordList.add(new OldAndModern("howbeit", "nevertheless"));
@@ -38,6 +63,7 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("therein", "in that"));
 		oldAndModernWordList.add(new OldAndModern("thereof", "of that"));
 		oldAndModernWordList.add(new OldAndModern("thereon", "upon that"));
+		oldAndModernWordList.add(new OldAndModern("thereunto", "to that"));
 		oldAndModernWordList.add(new OldAndModern("wherein", "in which"));
 		oldAndModernWordList.add(new OldAndModern("whereof", "of which"));
 		oldAndModernWordList.add(new OldAndModern("wherewith", "with which"));
@@ -51,28 +77,20 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("from from", "", "from")); // whence is sometimes already preceded by 'from' so remove 'from from' caused by previous replacement
 		
 		oldAndModernWordList.add(new OldAndModern("conjunction", "union"));
+		oldAndModernWordList.add(new OldAndModern("concernment", "concern"));
+		oldAndModernWordList.add(new OldAndModern("concernments", "concerns"));
 		
-		String[] REMOVE_ETH_ADD_S = new String[] {
-				"claspeth","knoweth","worketh","soaketh","belongeth","showeth","manifesteth","comprehendeth","profiteth","exhibiteth","dwelleth","inhabiteth",
-				"asketh","thirsteth","longeth","existeth","designeth","looketh","differeth","consisteth","aboundeth","groaneth","standeth","panteth","subsisteth",
-				"proceedeth","bringeth","bloweth","listeth","aimeth","heareth","discerneth","healeth","redeemeth","crowneth","expecteth","findeth"
-			};
 		for (String old : REMOVE_ETH_ADD_S) {
 			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"s"));
 		}
 
-		String[] REMOVE_ETH_ADD_ES = new String[] {
-				"goeth","cometh","presseth","urgeth","perplexeth","requireth","rejoiceth","perisheth","dieth","lieth","receiveth","conduceth","taketh","ariseth",
-				"passeth","maketh","shineth","expresseth","reproacheth","loveth","liveth","abideth","humbleth","causeth","giveth","loseth","testifieth","becometh",
-				"carrieth","reduceth","ceaseth","pleaseth","sanctifieth","ravisheth","communicateth","teacheth","proposeth","hideth","opposeth","refresheth","riseth",
-				"extinguisheth","proposeth","opposeth","compriseth","promoteth","seduceth","supplieth","wisheth","refuseth","increaseth","surpriseth","intermeddleth",
-				"forgiveth","satisfieth","enlargeth","flourisheth","loatheth","promiseth","includeth","changeth"
-			};
 		for (String old : REMOVE_ETH_ADD_ES) {
 			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"es"));
 		}
 
+		oldAndModernWordList.add(new OldAndModern("putteth", "puts"));
 		oldAndModernWordList.add(new OldAndModern("sitteth", "sits"));
+		oldAndModernWordList.add(new OldAndModern("worshippeth", "worships"));
 	}
 
 	public String filter(String in, boolean addNote) {
@@ -85,9 +103,9 @@ public class OldeEnglishModerniser {
 			in = in.replaceAll("\\b"+old+"\\b", modern+note);
 			in = in.replaceAll("\\b"+StringUtils.capitalize(old)+"\\b", StringUtils.capitalize(modern)+note);
 		}
+
+		displayOtherETHs(in);
 		
-		
-		// there a lot of double hyphens that confuse TTS but don't remove them from xml comments
 		return in;
 	}
 	
@@ -106,5 +124,31 @@ public class OldeEnglishModerniser {
 			this.note = note;
 			this.modern = modern;
 		}
-	}	
+	}
+	
+	private void displayOtherETHs(String in) {
+		Pattern patt = Pattern.compile( "\\b([A-Za-z]*eth)\\b");
+		Matcher m = patt.matcher(in);
+		StringBuffer retVal = new StringBuffer();
+		
+		// use TreeSet to avoid duplictes and sort
+		Set<String> wordETHSet = new TreeSet<String>();
+		
+		while (m.find()) {
+			String wordETH = m.group(0);
+			wordETHSet.add(wordETH.toLowerCase());
+		}
+		wordETHSet.removeAll(Arrays.asList(REMOVE_ETH_ADD_ES));
+		wordETHSet.removeAll(Arrays.asList(REMOVE_ETH_ADD_S));
+		wordETHSet.remove("putteth");
+		wordETHSet.remove("sitteth");
+		wordETHSet.remove("worshippeth");
+		if (wordETHSet.size()>0) {
+			System.out.println("Words ending in eth that have not been modernized");
+			for (String wordETH : wordETHSet) {
+				System.out.println("\""+wordETH+"\",");
+			}
+		}
+	}
+
 }

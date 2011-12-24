@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <osis xsi:schemaLocation="http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.2.1.1.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace">
-	<osisText osisRefWork="book" xml:lang="en" osisIDWork="SovereigntyOfGod">
+	<osisText osisRefWork="book" xml:lang="en" osisIDWork="JOGlory">
 		<header>
-			<work osisWork="SovereigntyOfGod">
+			<work osisWork="JOGlory">
 				<title>Meditations and Discourses on the Glory of Christ</title>
 				<creator role="aut">John Owen</creator>
 			</work>

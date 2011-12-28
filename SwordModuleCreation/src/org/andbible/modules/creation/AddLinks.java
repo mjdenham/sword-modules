@@ -18,15 +18,18 @@ public class AddLinks {
     // 33:12-14  // split over 2 lines
 	// Matt. 11:25-27
 	static Pattern bibleRefPattern = Pattern.compile( "(?:(?:[123]|I{1,3}\\.?)\\s*)?"+  // number preceding book name e.g. 1 Cor, 2 Kings, 3 John
-											"(?:[A-Z][a-zA-Z]+|Song of Songs|Song of Solomon).?\\s+"+ // book
-											"((?:(?:1?[0-9]?[0-9])|(?:[clxviCLXVI]{1,7})))[:.]\\s*"+ // chapter using arabic or roman numerals
-											"\\d{1,3}(?:[,-]\\s*\\d{1,3})*"+ // verse
+											"(?:[A-Z][a-zA-Z]+|Song of Songs|Song of Solomon)[\\.,]?\\s+"+ // book
+											"(?:(?:[Cc][hapter]{3,6}\\.?)\\s*)?"+						// possible 'chapter' word
+											"((?:(?:1?[0-9]?[0-9])|(?:[clxviCLXVI]{1,7})))[:.]?\\s*"+ // chapter using arabic or roman numerals
+											"(?:(?:[Vv][erse]{0,4}\\.?)\\s*)?"+						// possible 'verse' word
+											"(?:\\d{1,3})(?:[,-]\\s*\\d{1,3})*"+ // verse
 											"[.]?"+  // roman verse refs generally have a dot after the verse
 											// adding the below caters for references like II Ki. 2:11; 3:12-22
 											"(?:;\\s*"+							// I am not sure what the ; is doing here, but it precedes a possible repeated ref
 											"(?:(?:[123]|I{1,3})\\s*)?(?:1?[0-9]?[0-9]):\\s*\\d{1,3}(?:[,-]\\s*\\d{1,3})*)*");
 	
 	static Pattern removeChars = Pattern.compile("\\s");
+	static String[] removeWords = new String[] {"chap.", "chapter", "ver.", "verse"};
 
 	public String filter(String in) {
 		Matcher m = bibleRefPattern.matcher(in);
@@ -56,6 +59,9 @@ public class AddLinks {
 		String linkOrOrig = "";
 		// remove tabs and CRs because they confuse PassageKeyFactory
 		String tidiedRef = removeChars.matcher(ref).replaceAll(" ");
+		for (String remove : removeWords) {
+			tidiedRef = tidiedRef.replace(remove, "");
+		}
 		
 		// check if the part that matched the regexp is a valid bible reference
 		Key key = PassageKeyFactory.instance().getValidKey(tidiedRef); 

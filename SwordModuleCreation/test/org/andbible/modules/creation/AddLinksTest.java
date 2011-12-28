@@ -30,6 +30,16 @@ public class AddLinksTest {
 	}
 
 	@Test
+	public void chapVerTest() {
+		assertThat( links.filter("1\n   Peter. chap. ii. ver. 6-8"), equalTo("<reference osisRef=\"1Pet.2.6 1Pet.2.7 1Pet.2.8\">1 Peter 2:6-8</reference>"));
+	}
+	
+	@Test
+	public void chapterTest() {
+		assertThat( links.filter("Isaiah chap. vi"), equalTo("<reference osisRef=\"Isa.6\">Isaiah 6</reference>"));
+	}
+
+	@Test
 	public void confusingTextTest() {
 		assertThat( links.filter("1 2 3 Bad 2:3 asdd"), equalTo("1 2 3 Bad 2:3 asdd"));
 		assertThat( links.filter("contrary. 1"), equalTo("contrary. 1"));

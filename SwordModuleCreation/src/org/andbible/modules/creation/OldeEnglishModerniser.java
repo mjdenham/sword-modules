@@ -59,16 +59,21 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("doth", "does"));
 		oldAndModernWordList.add(new OldAndModern("herein", "in this"));
 		oldAndModernWordList.add(new OldAndModern("hereof", "of this"));
+		oldAndModernWordList.add(new OldAndModern("herewith", "with this"));
+		oldAndModernWordList.add(new OldAndModern("hereon", "upon this"));
 		oldAndModernWordList.add(new OldAndModern("hereunto", "to this"));
 		oldAndModernWordList.add(new OldAndModern("therein", "in that"));
 		oldAndModernWordList.add(new OldAndModern("thereof", "of that"));
+		oldAndModernWordList.add(new OldAndModern("therewithal", "with that"));
 		oldAndModernWordList.add(new OldAndModern("thereon", "upon that"));
 		oldAndModernWordList.add(new OldAndModern("thereunto", "to that"));
+		oldAndModernWordList.add(new OldAndModern("thereinto", "into that"));
 		oldAndModernWordList.add(new OldAndModern("wherein", "in which"));
 		oldAndModernWordList.add(new OldAndModern("whereof", "of which"));
 		oldAndModernWordList.add(new OldAndModern("wherewith", "with which"));
 		oldAndModernWordList.add(new OldAndModern("wherefore", "therefore"));
 		oldAndModernWordList.add(new OldAndModern("whereunto", "to which"));
+		oldAndModernWordList.add(new OldAndModern("whereinto", "into which"));
 		oldAndModernWordList.add(new OldAndModern("whereby", "through which"));
 		oldAndModernWordList.add(new OldAndModern("unto", "to"));
 		oldAndModernWordList.add(new OldAndModern("hath", "has"));
@@ -79,6 +84,20 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("conjunction", "union"));
 		oldAndModernWordList.add(new OldAndModern("concernment", "concern"));
 		oldAndModernWordList.add(new OldAndModern("concernments", "concerns"));
+		oldAndModernWordList.add(new OldAndModern("supportment", "support"));
+		oldAndModernWordList.add(new OldAndModern("disquietment", "disquiet"));
+		oldAndModernWordList.add(new OldAndModern("furnishment", "furnishing"));
+		oldAndModernWordList.add(new OldAndModern("relinquishment", "relinquishing"));
+		
+		oldAndModernWordList.add(new OldAndModern("especial", "special"));
+		oldAndModernWordList.add(new OldAndModern("an special", "a special")); // fix up previous replacement
+
+		oldAndModernWordList.add(new OldAndModern("1^st", "First"));
+		oldAndModernWordList.add(new OldAndModern("2^dly", "Secondly"));
+		oldAndModernWordList.add(new OldAndModern("3^dly", "Thirdly"));
+		oldAndModernWordList.add(new OldAndModern("4^thly", "Fourthly"));
+		oldAndModernWordList.add(new OldAndModern("5^thly", "Fifthly"));
+		oldAndModernWordList.add(new OldAndModern("6^thly", "Sixthly"));
 		
 		for (String old : REMOVE_ETH_ADD_S) {
 			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"s"));

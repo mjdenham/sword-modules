@@ -26,11 +26,11 @@ public class InsertParts {
 			// modernize here to prevent addition of <note/> in OSISId and title later 
 			title = new OldeEnglishModerniser().filter(title,  false);
 
-			String safeTitle = OSISHelper.getValidOsisId(title);
+			String osisId = OSISHelper.getValidOsisId(title);
 			// replace empty line
 			System.out.println(" Title:"+title);
 			
-			String newText = MessageFormat.format(replacement, safeTitle, title);
+			String newText = MessageFormat.format(replacement, osisId, title);
 			
 			m.appendReplacement(retVal,  newText);
 		}

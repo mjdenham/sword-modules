@@ -30,7 +30,7 @@ public class InsertSections {
 		StringBuffer retVal = new StringBuffer();
 		
 		while (m.find()) {
-			String section = "Chapter "+Roman.toLong(m.group(1));
+			String chapter = "Chapter "+Roman.toLong(m.group(1));
 			String title = m.group(2);
 			if (m.group(3)!=null) {
 				title += " "+m.group(3).trim();
@@ -40,12 +40,12 @@ public class InsertSections {
 			}
 			// modernize here to prevent addition of <note/> in OSISId and title later 
 			title = new OldeEnglishModerniser().filter(title,  false);
-
-			String osisId = OSISHelper.getValidOsisId(section+" "+title);
+			title = chapter+" "+title;
+			String osisId = OSISHelper.getValidOsisId(title);
 
 			System.out.println("Section "+osisId);
 			
-			String newText = MessageFormat.format(replacement, osisId, osisId);
+			String newText = MessageFormat.format(replacement, osisId, title);
 			
 			m.appendReplacement(retVal,  newText);
 		}

@@ -92,12 +92,12 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("especial", "special"));
 		oldAndModernWordList.add(new OldAndModern("an special", "a special")); // fix up previous replacement
 
-		oldAndModernWordList.add(new OldAndModern("1^st", "First"));
-		oldAndModernWordList.add(new OldAndModern("2^dly", "Secondly"));
-		oldAndModernWordList.add(new OldAndModern("3^dly", "Thirdly"));
-		oldAndModernWordList.add(new OldAndModern("4^thly", "Fourthly"));
-		oldAndModernWordList.add(new OldAndModern("5^thly", "Fifthly"));
-		oldAndModernWordList.add(new OldAndModern("6^thly", "Sixthly"));
+		oldAndModernWordList.add(new OldAndModern("1\\^st", "First"));
+		oldAndModernWordList.add(new OldAndModern("2\\^dly", "Secondly"));
+		oldAndModernWordList.add(new OldAndModern("3\\^dly", "Thirdly"));
+		oldAndModernWordList.add(new OldAndModern("4\\^thly", "Fourthly"));
+		oldAndModernWordList.add(new OldAndModern("5\\^thly", "Fifthly"));
+		oldAndModernWordList.add(new OldAndModern("6\\^thly", "Sixthly"));
 		
 		for (String old : REMOVE_ETH_ADD_S) {
 			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"s"));
@@ -120,7 +120,10 @@ public class OldeEnglishModerniser {
 			String noteWord = oldAndModern.note;
 			String note = addNote && StringUtils.isNotEmpty(noteWord) ? "<note n=\""+noteWord+"\">Auto-modernized</note>" : "";
 			in = in.replaceAll("\\b"+old+"\\b", modern+note);
-			in = in.replaceAll("\\b"+StringUtils.capitalize(old)+"\\b", StringUtils.capitalize(modern)+note);
+			// if starts with a number then capitalize has no effect and replacement will be duplicated causing errors
+			if (!StringUtils.isNumeric(old.substring(0, 0))) {
+				in = in.replaceAll("\\b"+StringUtils.capitalize(old)+"\\b", StringUtils.capitalize(modern)+note);
+			}
 		}
 
 		displayOtherETHs(in);

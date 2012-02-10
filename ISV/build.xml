@@ -11,7 +11,7 @@
 	<property name="distribution.dir"  value="${build.dir}/distribution"/>
     <property name="tar.gz.dir"  value="${build.dir}/tar.gz"/>
 
-    <property name="main-class"  value="org.andbible.modules.isv.Start"/>
+    <property name="main-class"  value="org.andbible.modules.isv.SMakeISV"/>
 
 	<property name="lib.dir"     value="libs"/>
 	<property name="andbible.lib.dir"  value="../../and-bible/AndBible/libs"/>

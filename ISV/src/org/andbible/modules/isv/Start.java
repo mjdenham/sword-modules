@@ -9,7 +9,6 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.crosswire.jsword.versification.BibleBook;
-import org.crosswire.jsword.versification.BibleInfo;
 
 /**
  * convert simple text to Sword Gen Book
@@ -78,7 +77,7 @@ public class Start {
 	private static final String OSIS_CHAPTER_END = "</chapter>";
 	private static final String BEFORE_CHAPTER_NO = "<w:pStyle w:val=\"Heading4\" />";
 	
-	private static final String OSIS_SECTION_TITLE_START = "<title subType=\"x-preverse\" type=\"section\">";
+	private static final String OSIS_SECTION_TITLE_START = "<title type=\"section\">";
 	private static final String OSIS_SECTION_TITLE_END = "</title>";
 	private static final String BEFORE_SECTION_TITLE = "<w:pStyle w:val=\"Heading5\" />";
 	private static final String END = "</w:p>";
@@ -111,7 +110,7 @@ public class Start {
 	private void doit() {
 		try {
 			System.out.println("Starting");
-			String osis = process(new File("xml/ISV-tidied.xml"));
+			String osis = process(new File("xml/ISV-tidied-edited.xml"));
 			IOUtils.write(osis, new FileOutputStream("ISV.xml"));
 			System.out.println("Finished");
 		} catch (Exception e) {
@@ -174,8 +173,11 @@ public class Start {
 		if (line.contains(TEXT)) {
 			String text = fixUpText(trimTags(line));
 			out.append(text);
-			// joining all text together sometimes merges words so add a space
-			out.append(" ");
+//			// joining all text together sometimes merges words so add a space
+//			// Israeli is often split from final s - Israelis
+//			if (!text.endsWith("Israeli")) {
+//				out.append(" ");
+//			}
 		}
 	}
 
@@ -317,10 +319,11 @@ public class Start {
 			}
 			if (line.contains(TEXT)) {
 				try {
-					String verse = trimTags(line);
+					String verse = trimTags(line).trim();
 					verseNo = Integer.valueOf(verse);
 				} catch (Exception e) {
-					System.out.println("Err:Text in place of verse:"+line);
+					System.out.println("Warning:Text in place of verse:"+line);
+					printIfText(line, out);
 				}
 			}
 		} while (verseNo==-1);

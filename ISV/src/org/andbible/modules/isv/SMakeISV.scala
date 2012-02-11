@@ -4,11 +4,12 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileReader
-import java.io.IOException
-
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.StringUtils
 import org.crosswire.jsword.versification.BibleBook
+import java.util.ArrayList
+import scala.collection.mutable.ListBuffer
+import org.andbible.modules.creation.AddLinks
 
 /**
 * remove all semi-colons
@@ -58,6 +59,8 @@ object SMakeISV {
 
 class SMakeISV {
 
+	val quick = false
+	
 	val CR = System.getProperty("line.separator")
 	val OSIS_BIBLE_START =
 	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
@@ -93,10 +96,13 @@ class SMakeISV {
 	val OSIS_CHAPTER = "<chapter osisID='%1$s.%2$d'>"
 	val OSIS_CHAPTER_END = "</chapter>"
 	val BEFORE_CHAPTER_NO = "<w:pStyle w:val=\"Heading4\" />"
-	
-	val OSIS_SECTION_TITLE_START = "<title type=\"section\">";
+
+	var pendingVerseTitles = new ListBuffer[String]
+	val OSIS_SECTION_TITLE_START = "<title subType=\"x-preverse\" type=\"section\">";
+	val OSIS_SUBSECTION_TITLE_START = "<title subType=\"x-preverse\" type=\"section\" level=\"2\">";
 	val OSIS_SECTION_TITLE_END = "</title>"
 	val BEFORE_SECTION_TITLE = "<w:pStyle w:val=\"Heading5\" />"
+	val BEFORE_RELATED_REF_TITLE = "<w:pStyle w:val=\"Heading6\" />"
 	val END = "</w:p>"
 
 	val OSIS_PARAGRAPH_START = "<p>"
@@ -113,12 +119,25 @@ class SMakeISV {
 	val BEFORE_VERSE = "<w:r wsp:rsidRPr="
 	
 	val BEFORE_FOOTNOTE = "<w:footnote>"
-
+    val BEFORE_FOOTNOTE_TEXT = "<w:pStyle w:val=\"FootnoteText\" />"
+	
+	val OSIS_PRE_PSALM_LINE = "<l level=\"1\"/>"
+	val OSIS_PRE_PSALM_LINE_2 = "<l level=\"2\"/>"
+//	val OSIS_PRE_PSALM_LINE = "<milestone type=\"x-extra-p\"/>"
+	val BEFORE_PSALM_LINE_ANY = "<w:pStyle w:val=\"PsalmLine"
+	val BEFORE_PSALM_LINE_1 = "<w:pStyle w:val=\"PsalmLine1\" />"
+	val BEFORE_PSALM_LINE_2 = "<w:pStyle w:val=\"PsalmLine2\" />"
+	val BEFORE_PSALM_LINE_1_CONTINUED = "<w:pStyle w:val=\"PsalmLine1Continued\" />"
+	val BEFORE_PSALM_LINE_2_LAST_LINE = "<w:pStyle w:val=\"PsalmLine2LastLine\" />"
+	val AFTER_PSALM_LINES = "<w:pStyle w:val=\"NormalContinued\" />"
+		
 	val IGNORE_1 = "<w:sectPr wsp:rsidR=\""
 	val IGNORE_1_END = "</w:sectPr>"
 
 	// mising out the opening '<' allows teh text to be spread over 2 lines e.g. 2Kgs.7.12
 	val TEXT = "w:t>"
+		
+	var currentQuotesID:Int = 1
 
 	def doit(): Unit = {
 		try {
@@ -154,13 +173,21 @@ class SMakeISV {
 						parseChapterNo(input, out)
 					} else if (line.contains(BEFORE_SECTION_TITLE)) {
 						parseSectionTitle(input, out)
+					} else if (line.contains(BEFORE_RELATED_REF_TITLE)) {
+						parseRelatedRefTitle(input, out)
 					} else if (line.contains(BEFORE_PARAGRAPH_1) && line.contains(BEFORE_PARAGRAPH_2)) {
 						newParagraph(out)
 					} else if (line.contains(BEFORE_VERSE_NO)) {
 						parseVerseNo(input, out)
+					} else if (line.contains(BEFORE_PSALM_LINE_1) || line.contains(BEFORE_PSALM_LINE_1_CONTINUED)) {
+						startPoetryLine(out, 1)
+					} else if (line.contains(BEFORE_PSALM_LINE_2)) {
+						startPoetryLine(out, 2)
+					} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
+						startPoetryLine(out,2)
 //					} else if (line.contains(BEFORE_VERSE)) {
 //						parseVerse(input, out)
-					} else if (line.contains(BEFORE_FOOTNOTE)) {
+					} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
 						parseFootnote(input, out)
 					} else if (line.contains(IGNORE_1)) {
 						ignore(input, IGNORE_1_END)
@@ -294,20 +321,57 @@ class SMakeISV {
 		
 		out.append(CR)
 		out.append(OSIS_CHAPTER.format(mCurrentBook, mCurrentChapter))
+		
+		//reset quoteID counter
+//		currentQuotesID = 1;
 	}
 
 	private def parseSectionTitle(input:BufferedReader, out:StringBuilder) = {
-		out.append(CR)
-		out.append(OSIS_SECTION_TITLE_START)
+		val title = new StringBuilder
+		var nonEmptyTitle = false
+		title.append(CR)
+		title.append(OSIS_SECTION_TITLE_START)
 		var line:String = null
 		do {
 			line = input.readLine()
 			if (line.contains(TEXT)) {
-				out.append(fixUpText(trimTags(line)))
+				title.append(fixUpText(trimTags(line)))
+				nonEmptyTitle = true
 			}
 		} while (!line.contains(END))
 
-		out.append(OSIS_SECTION_TITLE_END)
+		title.append(OSIS_SECTION_TITLE_END)
+		
+		if (nonEmptyTitle) {
+			pendingVerseTitles+=title.toString()
+		}
+	}
+	private def parseRelatedRefTitle(input:BufferedReader, out:StringBuilder) = {
+		val title = new StringBuilder
+		var nonEmptyTitle = false
+		title.append(CR)
+		title.append(OSIS_SUBSECTION_TITLE_START)
+		var line:String = null
+		do {
+			line = input.readLine()
+			if (line.contains(TEXT)) {
+				title.append(fixUpText(trimTags(line)))
+				nonEmptyTitle = true
+			}
+		} while (!line.contains(END))
+
+		title.append(OSIS_SECTION_TITLE_END)
+		
+		var titleStr:String = ""
+		if (!quick) {
+			titleStr = 	new AddLinks().filter(title.toString())
+		} else {
+			titleStr = title.toString()
+		}
+
+		if (nonEmptyTitle) {
+			pendingVerseTitles+=titleStr
+		}
 	}
 	
 	private def newParagraph(out:StringBuilder) {
@@ -341,6 +405,10 @@ class SMakeISV {
 		} while (verseNo == -1)
 
 		newVerse(out, verseNo)
+
+		// append titles
+		pendingVerseTitles.foreach( title => out.append(title) )
+		pendingVerseTitles.clear()
 	}
 
 	private def newVerse(out:StringBuilder, verseNo:Int) {
@@ -372,8 +440,19 @@ class SMakeISV {
 //				out.append(trimTags(line))
 //			}
 		} while (!line.contains(END))
-
 //		out.append(System.getProperty("line.separator"))
+		
+		//TODO remove - this just stops words being merged until footnotes are implemented
+		out.append(" ")
+
+	}
+	
+	private def startPoetryLine(out:StringBuilder, indentationLevel:Int) = {
+		if (indentationLevel==1) {
+			out.append(OSIS_PRE_PSALM_LINE)
+		} else {
+			out.append(OSIS_PRE_PSALM_LINE_2)
+		}
 	}
 
 	private def ignore(input:BufferedReader, until:String) = {
@@ -384,6 +463,7 @@ class SMakeISV {
 	}
 
 	private def trimTags(textIn:String):String = {
+		var addWordseparatorAtEnd = false;
 		var text = textIn.trim()
 		var start = 0
 		if (text.startsWith("<")) {
@@ -393,10 +473,16 @@ class SMakeISV {
 		var end = text.length()
 		if (text.endsWith(">")) {
 			end = text.lastIndexOf("<")
+		} else {
+			addWordseparatorAtEnd = true;
 		}
 		
 		if (start<end) {
-			return text.substring(start, end)
+			text = text.substring(start, end)
+			if (addWordseparatorAtEnd) {
+				text += " "
+			}
+			return text 
 		} else {
 			return ""
 		}
@@ -410,20 +496,60 @@ class SMakeISV {
 	private def fixUpText(text:String):String = {
 		var fixedUp = text
 							.replace("&#226;&#8364;&#732;", "'")	// open quoting apostrophe e.g. Gen 3:23 shall be called '(<-this apostrophe)Woman'
-							.replace("&#226;&#8364;&#8482;", "'")	// apostrophe
+							.replace("&#226;&#8364;&#8482;", "'")	// matching closing apostrophe for above OR possessive apostrophe e.g. God's judgement
 							.replace("&#226;&#8364;&#8221;", " - ") // hyphen e.g. 2 occurrences in Gen 1:16
 							.replace("&#226;&#8364;&#8220;", "-") 	// hyphen in a verse range e.g. Ex 1:1-4
 							.replace("&#195;&#173;", "i")	// i acute e.g. in last chapter of Ezra v38: Baní, Binai, Shihezi
 							.replace("&#195;&#175;", "i")	// accented i as in naive 
 							.replace("&#195;&#169;", "e")	// accented e as in last e of naivite 
-							.replace("&#226;&#8364;&#339;", "<q marker='\"' />") // open quote
-							.replace("&#226;&#8364;", "<q marker='\"' />")		// close quote
 							.replace("&#166;", "...") // ellipses e.g. Gen 18:31
 							.replace("&#239;&#187;&#191;", "") // this doesn't seem to be anything
 							.replace("&#194; ", "") // this doesn't seem to be anything
-							 
+
+		// 100 okay
+		// 1000 okay
+		// 1521 okay
+		// 1525 crashes
+		// 1600 crashes
+		// 1700 crashes
+		// 2000 crashes
+		// 5000 crashes
+		// 10000 crashes
+//		if (currentQuotesID<10000) {
+			fixedUp = fixedUp
+							.replace("&#226;&#8364;&#339;", getQ) // open quote
+							.replace("&#226;&#8364;", getQ)		// close quote
+//							.replace("&#226;&#8364;&#339;", "<q marker='\"' sID='"+ getQuoteStartIdAndInc +"'/>") // open quote
+//							.replace("&#226;&#8364;", "<q marker='\"' eID='"+getQuoteEndId +"'/>")		// close quote
+//		}
+		
 		return fixedUp
 	}
+	
+	var isOpenQ = false
+	def getQ = {
+		if (!isOpenQ) {
+			isOpenQ = true
+			"<q marker='\"'>"
+		} else {
+			isOpenQ = false
+			"</q>"
+		}
+	}
+	
+	var stack:Int = 0
+	def getQuoteStartIdAndInc() = {
+		currentQuotesID += 1
+		stack += 1
+		println( "Sid:"+currentQuotesID + " stack:"+stack) 
+		currentQuotesID
+	}
+	def getQuoteEndId() = {
+		stack -= 1
+		println( "Eid "+currentQuotesID + " stack:"+stack) 
+		currentQuotesID
+	}
+	
 	private def makeVerseStartTag():String = {
 		return OSIS_VERSE.format( mCurrentBook.getOSIS(), mCurrentChapter, mCurrentVerseNo)
 	}

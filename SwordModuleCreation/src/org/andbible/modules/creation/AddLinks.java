@@ -62,7 +62,7 @@ public class AddLinks {
 		for (String remove : removeWords) {
 			tidiedRef = tidiedRef.replace(remove, "");
 		}
-		
+
 		// check if the part that matched the regexp is a valid bible reference
 		Key key = PassageKeyFactory.instance().getValidKey(tidiedRef); 
 		if (key.isEmpty()) {
@@ -71,7 +71,7 @@ public class AddLinks {
 			linkOrOrig = unalteredRef;
 		} else {
 			// valid ref found
-			String link = "<reference osisRef=\""+key.getOsisID()+"\">"+key.getName()+"</reference>";
+			String link = "<reference osisRef=\""+key.getOsisRef()+"\">"+key.getName()+"</reference>";
 			System.out.println(unalteredRef+"->"+link);
 			linkOrOrig = link;
 //				// we removed all tabs and CRs so add one at end if there was one in original ref

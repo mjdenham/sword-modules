@@ -10,6 +10,8 @@ import org.crosswire.jsword.versification.BibleBook
 import java.util.ArrayList
 import scala.collection.mutable.ListBuffer
 import org.andbible.modules.creation.AddLinks
+import org.crosswire.jsword.passage.Verse
+import org.crosswire.jsword.passage.KeyUtil
 
 /**
 * remove all semi-colons
@@ -59,7 +61,7 @@ object SMakeISV {
 
 class SMakeISV {
 
-	val quick = false
+	val quick = true
 	
 	val CR = System.getProperty("line.separator")
 	val OSIS_BIBLE_START =
@@ -105,8 +107,8 @@ class SMakeISV {
 	val BEFORE_RELATED_REF_TITLE = "<w:pStyle w:val=\"Heading6\" />"
 	val END = "</w:p>"
 
-	val OSIS_PARAGRAPH_START = "<p>"
-	val OSIS_PARAGRAPH_END = "</p>"
+	val OSIS_PARAGRAPH_START = "" //"<lb type=\"x-begin-paragraph\"/>"
+	val OSIS_PARAGRAPH_END = "<lb/>" //"<lb type=\"x-end-paragraph\"/>"
 	val BEFORE_PARAGRAPH_1 = "<w:p wsp:rsidR="
 	val BEFORE_PARAGRAPH_2 = " wsp:rsidRPr="
 	var isParagraphClosed = true
@@ -118,19 +120,43 @@ class SMakeISV {
 
 	val BEFORE_VERSE = "<w:r wsp:rsidRPr="
 	
+	var footnoteNo = 0
+	// e.g. "<note n=\"1\" osisID=\"Gen.1.26!note.1\" osisRef=\"Gen.1.26\" type=\"explanation\">"
+	// 1= note no; 2=OsisId
+	val OSIS_PRE_FOOTNOTE = "<note n=\"%1$d\" osisID=\"%2$s!note.%1$d\" osisRef=\"%2$s\" type=\"explanation\">"
+	val OSIS_POST_FOOTNOTE = "</note>"
 	val BEFORE_FOOTNOTE = "<w:footnote>"
     val BEFORE_FOOTNOTE_TEXT = "<w:pStyle w:val=\"FootnoteText\" />"
+
+    	
+    	
+	val OSIS_PRE_PSALM_LINES = "<lg>"
+	val OSIS_POST_PSALM_LINES = "</lg>"
+	val OSIS_PRE_PSALM_LINE_1 = "<l level='1'>"
+	val OSIS_PRE_PSALM_LINE_2 = "<l level='2'>"
+	val OSIS_PRE_PSALM_LINE_3 = "<l level='3'>"
+	val OSIS_POST_PSALM_LINE = "</l>"
 	
-	val OSIS_PRE_PSALM_LINE = "<l level=\"1\"/>"
-	val OSIS_PRE_PSALM_LINE_2 = "<l level=\"2\"/>"
 //	val OSIS_PRE_PSALM_LINE = "<milestone type=\"x-extra-p\"/>"
-	val BEFORE_PSALM_LINE_ANY = "<w:pStyle w:val=\"PsalmLine"
-	val BEFORE_PSALM_LINE_1 = "<w:pStyle w:val=\"PsalmLine1\" />"
-	val BEFORE_PSALM_LINE_2 = "<w:pStyle w:val=\"PsalmLine2\" />"
-	val BEFORE_PSALM_LINE_1_CONTINUED = "<w:pStyle w:val=\"PsalmLine1Continued\" />"
-	val BEFORE_PSALM_LINE_2_LAST_LINE = "<w:pStyle w:val=\"PsalmLine2LastLine\" />"
-	val AFTER_PSALM_LINES = "<w:pStyle w:val=\"NormalContinued\" />"
+	val BEFORE_PSALM_LINE_ANY = "PsalmLine"
+//	val BEFORE_PSALM_LINE_1 = "<w:pStyle w:val=\"PsalmLine1\" />"
+//	val BEFORE_PSALM_LINE_2 = "<w:pStyle w:val=\"PsalmLine2\" />"
+//	val BEFORE_PSALM_LINE_1_CONTINUED = "<w:pStyle w:val=\"PsalmLine1Continued\" />"
+//	val BEFORE_PSALM_LINE_2_LAST_LINE = "<w:pStyle w:val=\"PsalmLine2LastLine\" />"
+//	val BEFORE_PSALM_LINE_3_LAST_LINE = "<w:pStyle w:val=\"PsalmLine3LastLine\" />"
+//	val AFTER_PSALM_LINES = "<w:pStyle w:val=\"NormalContinued\" />"
 		
+		/*
+                  <w:pStyle w:val="StylePsalmLine110pt" />
+                  <w:pStyle w:val="StylePsalmLine210pt" />
+
+		 */
+
+	var isWOC = false
+//	val OSIS_PRE_WOC = "<q marker=\"\" who=\"Jesus\">"
+//	val OSIS_POST_WOC = "</q>"
+	val BEFORE_WOC_RED = "<w:color w:val=\"FF0000\" />"
+	
 	val IGNORE_1 = "<w:sectPr wsp:rsidR=\""
 	val IGNORE_1_END = "</w:sectPr>"
 
@@ -152,13 +178,13 @@ class SMakeISV {
 
 	private def process(aFile: File):String = {
 		// ...checks on aFile are elided
-		var out = new StringBuilder()
-
+		var resultStr = ""
 		try {
 			// use buffering, reading one line at a time
 			// FileReader always assumes default encoding is OK!
 			var input = new BufferedReader(new FileReader(aFile))
 			try {
+				var out = new StringBuilder()
 				var line:String = null // not declared within while loop
 				
 				out.append(OSIS_BIBLE_START)
@@ -179,16 +205,17 @@ class SMakeISV {
 						newParagraph(out)
 					} else if (line.contains(BEFORE_VERSE_NO)) {
 						parseVerseNo(input, out)
-					} else if (line.contains(BEFORE_PSALM_LINE_1) || line.contains(BEFORE_PSALM_LINE_1_CONTINUED)) {
-						startPoetryLine(out, 1)
-					} else if (line.contains(BEFORE_PSALM_LINE_2)) {
-						startPoetryLine(out, 2)
 					} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
-						startPoetryLine(out,2)
+						startPoetryLine(input, out, line)
 //					} else if (line.contains(BEFORE_VERSE)) {
 //						parseVerse(input, out)
 					} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
 						parseFootnote(input, out)
+// ignore WOC for now because too many errors in q nesting					
+					} else if (line.contains(BEFORE_WOC_RED)) {
+						isWOC = true
+					} else if (line.contains(END)) {
+						isWOC = false
 					} else if (line.contains(IGNORE_1)) {
 						ignore(input, IGNORE_1_END)
 					} else {
@@ -197,6 +224,8 @@ class SMakeISV {
 					
 				}
 				out.append(OSIS_BIBLE_END)
+				
+				resultStr = out.toString()
 			} finally {
 				input.close()
 			}
@@ -204,7 +233,7 @@ class SMakeISV {
 		  case e:Exception => e.printStackTrace()
 		}
 
-		return out.toString()
+		return resultStr
 	}
 
 	private def printIfText(line:String, out:StringBuilder) = {
@@ -284,6 +313,9 @@ class SMakeISV {
 		checkVerseEnded(out)
 		checkParagraphEnded(out)
 		
+		// reset note counter after every chapter
+		footnoteNo = 0
+		
 		var chapterNo:Int = -1
 		var line:String = null
 		var text:String = ""
@@ -311,6 +343,9 @@ class SMakeISV {
 	}
 
 	private def newChapter(out:StringBuilder, chapterNo:Int) = {
+		// poetry lines aren't always closed before chapters but should be
+		checkPoetryLinesClosed(out)
+		
 		mCurrentChapter = chapterNo
 		mCurrentVerseNo = 1
 
@@ -433,26 +468,93 @@ class SMakeISV {
 
 	private def parseFootnote(input:BufferedReader, out:StringBuilder) = {
 		var line:String = null
+		footnoteNo = footnoteNo+1
+		out.append(OSIS_PRE_FOOTNOTE.format(footnoteNo, getVerseOSISId))
 		do {
 			line = input.readLine()
-// Ignore Footnotes initiallly
-//			if (line.contains(TEXT)) {
-//				out.append(trimTags(line))
-//			}
+			if (line.contains(TEXT)) {
+				out.append(trimTags(line))
+			}
 		} while (!line.contains(END))
-//		out.append(System.getProperty("line.separator"))
-		
-		//TODO remove - this just stops words being merged until footnotes are implemented
-		out.append(" ")
-
+		out.append(OSIS_POST_FOOTNOTE)
+		out.append(System.getProperty("line.separator"))
 	}
 	
-	private def startPoetryLine(out:StringBuilder, indentationLevel:Int) = {
-		if (indentationLevel==1) {
-			out.append(OSIS_PRE_PSALM_LINE)
-		} else {
-			out.append(OSIS_PRE_PSALM_LINE_2)
+	private def getVerseOSISId:String = {
+		try {
+			return new Verse(mCurrentBook, mCurrentChapter, mCurrentVerseNo).getOsisID()
+		} catch {
+		  case e:Exception => {
+			println("Error generating note "+mCurrentBook+":"+mCurrentChapter+":"+mCurrentVerseNo)
+			return mCurrentBook.getOSIS()+"."+mCurrentChapter+"."+mCurrentVerseNo
+		  }
 		}
+	}
+	
+//	val BEFORE_PSALM_LINE_1 = "<w:pStyle w:val=\"PsalmLine1\" />"
+//	val BEFORE_PSALM_LINE_2 = "<w:pStyle w:val=\"PsalmLine2\" />"
+//	val BEFORE_PSALM_LINE_1_CONTINUED = "<w:pStyle w:val=\"PsalmLine1Continued\" />"
+//	val BEFORE_PSALM_LINE_2_LAST_LINE = "<w:pStyle w:val=\"PsalmLine2LastLine\" />"
+//	val BEFORE_PSALM_LINE_3_LAST_LINE = "<w:pStyle w:val=\"PsalmLine3LastLine\" />"
+//	val AFTER_PSALM_LINES = "<w:pStyle w:val=\"NormalContinued\" />"
+		/*
+                  <w:pStyle w:val="StylePsalmLine110pt" />
+                  <w:pStyle w:val="StylePsalmLine210pt" />
+		 */
+	var currentPoetryLevel = 0
+	private def startPoetryLine(input:BufferedReader, out:StringBuilder, line:String) = {
+		
+		var levelStr = line.charAt(line.indexOf("PsalmLine")+9).toString()
+		var indentationLevel = Integer.parseInt(levelStr);
+		var isLastLine = line.contains("LastLine");
+		
+		if (currentPoetryLevel != indentationLevel) {
+			if (currentPoetryLevel>0) {
+				// terminate previous level
+				out.append(OSIS_POST_PSALM_LINE)
+			} else {
+				// often the first line of poetry is on a new line 
+				checkIfParagraphRequired(out)
+				// starting first psalm line so need to add psalm lines wrapper tag
+				out.append(OSIS_PRE_PSALM_LINES)
+			}
+			
+			indentationLevel match {
+				case 1 => out.append(OSIS_PRE_PSALM_LINE_1)
+				case 2 => out.append(OSIS_PRE_PSALM_LINE_2)
+				case 3 => out.append(OSIS_PRE_PSALM_LINE_3)
+			}
+			
+			// poetry lines are on a new line anyway
+			isNewParagraphRequired = false
+		}
+
+		currentPoetryLevel = indentationLevel
+
+		// last line so parse poetry line text and then close poetry section
+		if (isLastLine) {
+			var verseLine = ""
+			while ({verseLine = input.readLine(); !verseLine.contains(END)}) {
+	
+				if (verseLine.contains(BEFORE_FOOTNOTE)) {
+					parseFootnote(input, out)
+				} else if (verseLine.contains(TEXT)) {
+					out.append( fixUpText(trimTags(verseLine)).trim() )
+				}
+			}
+			checkPoetryLinesClosed(out)
+
+			// since text is consumed to END need to check end of WOC because END is stop marker for WOC
+			isWOC = false
+		}
+	}
+	
+	private def checkPoetryLinesClosed(out:StringBuilder) {
+		if (currentPoetryLevel>0) {
+			out.append(OSIS_POST_PSALM_LINE)
+			out.append(OSIS_POST_PSALM_LINES)
+		}
+		currentPoetryLevel = 0
 	}
 
 	private def ignore(input:BufferedReader, until:String) = {
@@ -517,8 +619,8 @@ class SMakeISV {
 		// 10000 crashes
 //		if (currentQuotesID<10000) {
 			fixedUp = fixedUp
-							.replace("&#226;&#8364;&#339;", getQ) // open quote
-							.replace("&#226;&#8364;", getQ)		// close quote
+							.replace("&#226;&#8364;&#339;", getQ(true)) // open quote
+							.replace("&#226;&#8364;", getQ(false))		// close quote
 //							.replace("&#226;&#8364;&#339;", "<q marker='\"' sID='"+ getQuoteStartIdAndInc +"'/>") // open quote
 //							.replace("&#226;&#8364;", "<q marker='\"' eID='"+getQuoteEndId +"'/>")		// close quote
 //		}
@@ -527,31 +629,39 @@ class SMakeISV {
 	}
 	
 	var isOpenQ = false
-	def getQ = {
+	var quoteID:Int = 0
+	def getQ(opening:Boolean):String = {
+		var retVal = ""
+		if (opening == isOpenQ ) {
+			println("ERROR in Q:"+mCurrentBook+" "+mCurrentChapter+" "+mCurrentVerseNo)
+		}
+		
+		var woc = ""
+		if (isWOC) {
+			woc =  " who=\"Jesus\""
+		}
+		
 		if (!isOpenQ) {
 			isOpenQ = true
-			"<q marker='\"'>"
+			quoteID = quoteID + 1
+			retVal = "<q marker='\"' sID='"+quoteID+"' />"
 		} else {
 			isOpenQ = false
-			"</q>"
+			retVal = "<q marker='\"' eID='"+quoteID+"' />"
 		}
+		return retVal
 	}
-	
-	var stack:Int = 0
-	def getQuoteStartIdAndInc() = {
-		currentQuotesID += 1
-		stack += 1
-		println( "Sid:"+currentQuotesID + " stack:"+stack) 
-		currentQuotesID
-	}
-	def getQuoteEndId() = {
-		stack -= 1
-		println( "Eid "+currentQuotesID + " stack:"+stack) 
-		currentQuotesID
-	}
+
 	
 	private def makeVerseStartTag():String = {
 		return OSIS_VERSE.format( mCurrentBook.getOSIS(), mCurrentChapter, mCurrentVerseNo)
+	}
+	private def checkVerseEnded(out:StringBuilder) {
+		checkIfParagraphRequired(out)
+		if (!isVerseEnded && mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
+			out.append(OSIS_VERSE_END.format( mCurrentBook.getOSIS(), mCurrentChapter, mCurrentVerseNo))
+			isVerseEnded = true
+		}
 	}
 	private def checkIfParagraphRequired(out:StringBuilder) {
 		if (isNewParagraphRequired && mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
@@ -567,12 +677,28 @@ class SMakeISV {
 			isParagraphClosed = true
 		}
 	}
-	private def checkVerseEnded(out:StringBuilder) {
-		if (!isVerseEnded && mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
-			out.append(OSIS_VERSE_END.format( mCurrentBook.getOSIS(), mCurrentChapter, mCurrentVerseNo))
-			isVerseEnded = true
-		}
-		
-		checkIfParagraphRequired(out)
-	}
+//	var isInWOC = false
+//	var WOCID = 0
+//
+//	private def startWOC(out:StringBuilder) {
+//		checkWOCClosed(out)
+//		WOCID = WOCID + 1
+//		out.append(getWOCTag(true))
+//		isInWOC = true
+//	}
+//	private def checkWOCClosed(out:StringBuilder) {
+//		if (isInWOC) {
+//			isInWOC = false
+//			out.append(getWOCTag(false))
+//		}
+//	}
+//	private def getWOCTag(start:Boolean):String = {
+//		var retVal = ""
+//		if (start) {
+//			retVal = "<q marker=\"\" who=\"Jesus\" sID='WOC"+WOCID+"' />"
+//		} else {
+//			retVal = "<q marker=\"\" who=\"Jesus\" eID='WOC"+WOCID+"' />"
+//		}
+//		return retVal
+//	}
 }

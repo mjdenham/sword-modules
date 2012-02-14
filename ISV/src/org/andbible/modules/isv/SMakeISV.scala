@@ -108,7 +108,7 @@ class SMakeISV {
 	val END = "</w:p>"
 
 	val OSIS_PARAGRAPH_START = "" //"<lb type=\"x-begin-paragraph\"/>"
-	val OSIS_PARAGRAPH_END = "<lb/>" //"<lb type=\"x-end-paragraph\"/>"
+	val OSIS_PARAGRAPH_END = "<lb/>"+CR //"<lb type=\"x-end-paragraph\"/>"
 	val BEFORE_PARAGRAPH_1 = "<w:p wsp:rsidR="
 	val BEFORE_PARAGRAPH_2 = " wsp:rsidRPr="
 	var isParagraphClosed = true
@@ -129,7 +129,8 @@ class SMakeISV {
     val BEFORE_FOOTNOTE_TEXT = "<w:pStyle w:val=\"FootnoteText\" />"
 
     	
-    	
+	var pendingPoetryStartTags = ""
+    var isInPoetry = false
 	val OSIS_PRE_PSALM_LINES = "<lg>"
 	val OSIS_POST_PSALM_LINES = "</lg>"
 	val OSIS_PRE_PSALM_LINE_1 = "<l level='1'>"
@@ -152,6 +153,7 @@ class SMakeISV {
 
 		 */
 
+	val SMALLCAPS = "<w:smallCaps />"
 	var isWOC = false
 //	val OSIS_PRE_WOC = "<q marker=\"\" who=\"Jesus\">"
 //	val OSIS_POST_WOC = "</q>"
@@ -202,7 +204,10 @@ class SMakeISV {
 					} else if (line.contains(BEFORE_RELATED_REF_TITLE)) {
 						parseRelatedRefTitle(input, out)
 					} else if (line.contains(BEFORE_PARAGRAPH_1) && line.contains(BEFORE_PARAGRAPH_2)) {
-						newParagraph(out)
+						// poetry tags include new lines in them
+						if (!isInPoetry) {
+							newParagraph(out)
+						}
 					} else if (line.contains(BEFORE_VERSE_NO)) {
 						parseVerseNo(input, out)
 					} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
@@ -216,9 +221,16 @@ class SMakeISV {
 						isWOC = true
 					} else if (line.contains(END)) {
 						isWOC = false
+					} else if (line.contains(SMALLCAPS)) {
+						// leave as a placeholder for replacement later after all text has been merged
+						out.append(SMALLCAPS)
 					} else if (line.contains(IGNORE_1)) {
 						ignore(input, IGNORE_1_END)
 					} else {
+						// write any delayed tags before the actual text is written
+						checkIfParagraphRequired(out)
+						flushPendingPoetryStartTags(out)
+						
 						printIfText(line, out)
 					}
 					
@@ -226,6 +238,17 @@ class SMakeISV {
 				out.append(OSIS_BIBLE_END)
 				
 				resultStr = out.toString()
+				resultStr = resultStr.replace(SMALLCAPS+"Lord", " Lord ")
+									  .replace("L"+SMALLCAPS+"ord", " Lord ")
+									  .replace(SMALLCAPS+"God", " God ")
+									  .replace("G"+SMALLCAPS+"od", " God ")
+									  .replace(SMALLCAPS+"LORD", "<divineName>Lord</divineName>")
+									  .replace("L"+SMALLCAPS+"ORD", "<divineName>Lord</divineName>")
+									  .replace(SMALLCAPS, "")
+				// I don't know why there are duplicated line breaks throughout
+				for (i <- 1 to 3) {
+					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
+				}
 			} finally {
 				input.close()
 			}
@@ -477,7 +500,7 @@ class SMakeISV {
 			}
 		} while (!line.contains(END))
 		out.append(OSIS_POST_FOOTNOTE)
-		out.append(System.getProperty("line.separator"))
+		out.append(CR)
 	}
 	
 	private def getVerseOSISId:String = {
@@ -503,41 +526,50 @@ class SMakeISV {
 		 */
 	var currentPoetryLevel = 0
 	private def startPoetryLine(input:BufferedReader, out:StringBuilder, line:String) = {
+		// delay writing tags to avoid putting opening <lg><l> in previous verse
+		flushPendingPoetryStartTags(out)
 		
 		var levelStr = line.charAt(line.indexOf("PsalmLine")+9).toString()
 		var indentationLevel = Integer.parseInt(levelStr);
 		var isLastLine = line.contains("LastLine");
 		
-		if (currentPoetryLevel != indentationLevel) {
+		if (currentPoetryLevel!=indentationLevel || pendingPoetryStartTags.isEmpty()) {
 			if (currentPoetryLevel>0) {
 				// terminate previous level
 				out.append(OSIS_POST_PSALM_LINE)
 			} else {
+				isInPoetry = true
 				// often the first line of poetry is on a new line 
 				checkIfParagraphRequired(out)
 				// starting first psalm line so need to add psalm lines wrapper tag
-				out.append(OSIS_PRE_PSALM_LINES)
+				pendingPoetryStartTags += OSIS_PRE_PSALM_LINES
 			}
 			
+			var prePsalmLine = ""
 			indentationLevel match {
-				case 1 => out.append(OSIS_PRE_PSALM_LINE_1)
-				case 2 => out.append(OSIS_PRE_PSALM_LINE_2)
-				case 3 => out.append(OSIS_PRE_PSALM_LINE_3)
+				case 1 => pendingPoetryStartTags += OSIS_PRE_PSALM_LINE_1
+				case 2 => pendingPoetryStartTags += OSIS_PRE_PSALM_LINE_2
+				case 3 => pendingPoetryStartTags += OSIS_PRE_PSALM_LINE_3
 			}
-			
+
 			// poetry lines are on a new line anyway
 			isNewParagraphRequired = false
+			isParagraphClosed = true
 		}
 
 		currentPoetryLevel = indentationLevel
 
 		// last line so parse poetry line text and then close poetry section
 		if (isLastLine) {
+			flushPendingPoetryStartTags(out)
 			var verseLine = ""
 			while ({verseLine = input.readLine(); !verseLine.contains(END)}) {
 	
 				if (verseLine.contains(BEFORE_FOOTNOTE)) {
 					parseFootnote(input, out)
+				} else if (verseLine.contains(BEFORE_VERSE_NO)) {
+					// verse in last line in Job 41:10
+					parseVerseNo(input, out)
 				} else if (verseLine.contains(TEXT)) {
 					out.append( fixUpText(trimTags(verseLine)).trim() )
 				}
@@ -549,7 +581,13 @@ class SMakeISV {
 		}
 	}
 	
+	private def flushPendingPoetryStartTags(out:StringBuilder) {
+		out.append(pendingPoetryStartTags)
+		pendingPoetryStartTags = ""
+	}
+	
 	private def checkPoetryLinesClosed(out:StringBuilder) {
+		isInPoetry = false
 		if (currentPoetryLevel>0) {
 			out.append(OSIS_POST_PSALM_LINE)
 			out.append(OSIS_POST_PSALM_LINES)
@@ -664,16 +702,20 @@ class SMakeISV {
 		}
 	}
 	private def checkIfParagraphRequired(out:StringBuilder) {
-		if (isNewParagraphRequired && mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
-			checkParagraphEnded(out)
-			out.append(OSIS_PARAGRAPH_START)
+		if (isNewParagraphRequired) {
+			if (mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
+				checkParagraphEnded(out)
+				out.append(OSIS_PARAGRAPH_START)
+			}
 			isNewParagraphRequired = false
 			isParagraphClosed = false
 		}
 	}
 	private def checkParagraphEnded(out:StringBuilder) {
-		if (!isParagraphClosed && mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
-			out.append(OSIS_PARAGRAPH_END).append(CR)
+		if (!isParagraphClosed) {
+			if (mCurrentBook!=null && mCurrentChapter>0 && mCurrentVerseNo>0) {
+				out.append(OSIS_PARAGRAPH_END)
+			}
 			isParagraphClosed = true
 		}
 	}

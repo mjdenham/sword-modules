@@ -12,6 +12,7 @@ import scala.collection.mutable.ListBuffer
 import org.andbible.modules.creation.AddLinks
 import org.crosswire.jsword.passage.Verse
 import org.crosswire.jsword.passage.KeyUtil
+import scala.io.Source
 
 /**
 * remove all semi-colons
@@ -197,87 +198,85 @@ class SMakeISV {
 		// ...checks on aFile are elided
 		var resultStr = ""
 		try {
-			// use buffering, reading one line at a time
-			// FileReader always assumes default encoding is OK!
-			var input = new BufferedReader(new FileReader(aFile))
-			try {
-				var out = new StringBuilder()
-				var line:String = null // not declared within while loop
-				
-				out.append(OSIS_BIBLE_START)
-				while ({line = input.readLine(); line != null}) {
+			var out = new StringBuilder()
+			var line:String = null // not declared within while loop
+			
+			out.append(OSIS_BIBLE_START)
+			var source = Source.fromFile(aFile)
+			var inputIter:Iterator[String] = source.getLines
+			for (line <- inputIter) {
 //					debug = (getVerseOSISId.startsWith("3John"))
 //					if (debug) {
 //						println("Line"+line)
 //					}
-					if (handleUnusualLine(line, input, out)) {
-						// handled above
-					} else if (line.contains(BEFORE_BOOK)) {
-						parseBook(input, out)
-					} else if (line.contains(AFTER_BOOK)) {
-						endBook(input, out)
-					} else if (line.contains(BEFORE_CHAPTER_NO)) {
-						parseChapterNo(input, out)
-					} else if (line.contains(BEFORE_SECTION_TITLE)) {
-						parseSectionTitle(input, out)
-					} else if (line.contains(BEFORE_RELATED_REF_TITLE)) {
-						parseRelatedRefTitle(input, out)
-					} else if (line.contains(BEFORE_PARAGRAPH_1) && line.contains(BEFORE_PARAGRAPH_2)) {
-						// poetry tags include new lines in them
-						if (!isInPoetry) {
-							if (debug) {
-								println("New paragraph")
-							}
-							newParagraph(out)
+				if (handleUnusualLine(line, inputIter, out)) {
+					// handled above
+				} else if (line.contains(BEFORE_BOOK)) {
+					parseBook(inputIter, out)
+				} else if (line.contains(AFTER_BOOK)) {
+					endBook(inputIter, out)
+				} else if (line.contains(BEFORE_CHAPTER_NO)) {
+					parseChapterNo(inputIter, out)
+				} else if (line.contains(BEFORE_SECTION_TITLE)) {
+					parseSectionTitle(inputIter, out)
+				} else if (line.contains(BEFORE_RELATED_REF_TITLE)) {
+					parseRelatedRefTitle(inputIter, out)
+				} else if (line.contains(BEFORE_PARAGRAPH_1) && line.contains(BEFORE_PARAGRAPH_2)) {
+					// poetry tags include new lines in them
+					if (!isInPoetry) {
+						if (debug) {
+							println("New paragraph")
 						}
-					} else if (line.contains(BEFORE_VERSE_NO)) {
-						parseVerseNo(input, out)
-					} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
-						startPoetryLine(input, out, line)
-//					} else if (line.contains(BEFORE_VERSE)) {
-//						parseVerse(input, out)
-					} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
-						parseFootnote(input, out)
-// ignore WOC for now because too many errors in q nesting					
-					} else if (line.contains(BEFORE_WOC_RED)) {
-						isWOC = true
-					} else if (line.contains(END)) {
-						isWOC = false
-					} else if (line.contains(SMALLCAPS)) {
-						// leave as a placeholder for replacement later after all text has been merged
-						out.append(SMALLCAPS)
-					} else if (line.contains(IGNORE_1)) {
-						ignore(input, IGNORE_1_END)
-					} else if (isText(line)) {
-						
-						// write any delayed tags before the actual text is written
-						checkIfParagraphRequired(out)
-						flushPendingPoetryStartTags(out)
-						
-						printText(line, out)
+						newParagraph(out)
 					}
+				} else if (line.contains(BEFORE_VERSE_NO)) {
+					parseVerseNo(inputIter, out)
+				} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
+					startPoetryLine(inputIter, out, line)
+//					} else if (line.contains(BEFORE_VERSE)) {
+//						parseVerse(inputIter, out)
+				} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
+					parseFootnote(inputIter, out)
+// ignore WOC for now because too many errors in q nesting					
+				} else if (line.contains(BEFORE_WOC_RED)) {
+					isWOC = true
+				} else if (line.contains(END)) {
+					isWOC = false
+				} else if (line.contains(SMALLCAPS)) {
+					// leave as a placeholder for replacement later after all text has been merged
+					out.append(SMALLCAPS)
+				} else if (line.contains(IGNORE_1)) {
+					ignore(inputIter, IGNORE_1_END)
+				} else if (isText(line)) {
 					
+					// write any delayed tags before the actual text is written
+					checkIfParagraphRequired(out)
+					flushPendingPoetryStartTags(out)
+					
+					printText(line, out)
 				}
-				out.append(OSIS_BIBLE_END)
 				
-				resultStr = out.toString()
-				resultStr = resultStr.replace(SMALLCAPS+"Lord", " Lord ")
-									  .replace("L"+SMALLCAPS+"ord", " Lord ")
-									  .replace(SMALLCAPS+"God", " God ")
-									  .replace("G"+SMALLCAPS+"od", " God ")
-									  .replace(SMALLCAPS+"LORD", "<divineName>Lord</divineName>")
-									  .replace("L"+SMALLCAPS+"ORD", "<divineName>Lord</divineName>")
-									  .replace(SMALLCAPS, "")
-				// I don't know why there are duplicated line breaks throughout
+			}
+			source.close()
+			out.append(OSIS_BIBLE_END)
+			
+			resultStr = out.toString()
+			resultStr = resultStr.replace(SMALLCAPS+"Lord", " Lord ")
+								  .replace("L"+SMALLCAPS+"ord", " Lord ")
+								  .replace(SMALLCAPS+"God", " God ")
+								  .replace("G"+SMALLCAPS+"od", " God ")
+								  .replace(SMALLCAPS+"LORD", "<divineName>Lord</divineName>")
+								  .replace("L"+SMALLCAPS+"ORD", "<divineName>Lord</divineName>")
+								  .replace(SMALLCAPS, "")
+			// I don't know why there are duplicated line breaks throughout
 //				for (i <- 1 to 3) {
 //					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
 //				}
-				wordCheck.printUniqueWords()
-			} finally {
-				input.close()
-			}
+			wordCheck.printUniqueWords()
 		} catch {
 		  case e:Exception => e.printStackTrace()
+		} finally {
+//				inputIter.close()
 		}
 
 		return resultStr
@@ -298,7 +297,7 @@ class SMakeISV {
 		}
 	}
 
-	private def handleUnusualLine(line:String, input:BufferedReader, out:StringBuilder):Boolean = {
+	private def handleUnusualLine(line:String, input:Iterator[String], out:StringBuilder):Boolean = {
 		
 		if (line.contains("<w:t>36:1</w:t>")) {
 			// Exodus 36:1 is weird
@@ -311,13 +310,13 @@ class SMakeISV {
 		return false
 	}
 
-	private def parseBook(input:BufferedReader, out:StringBuilder) = {
+	private def parseBook(input:Iterator[String], out:StringBuilder) = {
 		out.append(CR)
 		var book:BibleBook = null
 		var bookName = ""
 		var line:String = null
 		do {
-			line = input.readLine()
+			line = input.next()
 			if (line.contains(TEXT) && book==null) {
 				bookName = mapBookNo(fixUpText(trimTags(line)))
 				book = BibleBook.getBook(bookName)
@@ -339,10 +338,10 @@ class SMakeISV {
 		out.append(OSIS_CHAPTER.format( mCurrentBook, mCurrentChapter))
 	}
 	
-	private def endBook(input:BufferedReader, out:StringBuilder) = {
+	private def endBook(input:Iterator[String], out:StringBuilder) = {
 		checkVerseEnded(out)
 		checkParagraphEnded(out)
-		input.readLine()
+		input.next
 		out.append(OSIS_CHAPTER_END)
 		out.append("</div>")
 		out.append(CR)
@@ -356,15 +355,15 @@ class SMakeISV {
 		footnoteNo = 0
 	}
 	
-	private def skipNTPreamble(input:BufferedReader) = {
+	private def skipNTPreamble(input:Iterator[String]) = {
 		var line:String = null
 		do {
-			line = input.readLine()
+			line = input.next
 
 		} while (!line.contains(AFTER_BOOK))
 	}
 	
-	private def parseChapterNo(input:BufferedReader, out:StringBuilder) = {
+	private def parseChapterNo(input:Iterator[String], out:StringBuilder) = {
 		checkVerseEnded(out)
 		checkParagraphEnded(out)
 		
@@ -375,7 +374,7 @@ class SMakeISV {
 		var line:String = null
 		var text:String = ""
 		do {
-			line = input.readLine()
+			line = input.next
 
 			if (line.contains(BEFORE_FOOTNOTE)) {
 				parseFootnote(input, out)
@@ -416,14 +415,14 @@ class SMakeISV {
 //		currentQuotesID = 1;
 	}
 
-	private def parseSectionTitle(input:BufferedReader, out:StringBuilder) = {
+	private def parseSectionTitle(input:Iterator[String], out:StringBuilder) = {
 		val title = new StringBuilder
 		var nonEmptyTitle = false
 		title.append(CR)
 		title.append(OSIS_SECTION_TITLE_START)
 		var line:String = null
 		do {
-			line = input.readLine()
+			line = input.next
 			if (line.contains(TEXT)) {
 				title.append(fixUpText(trimTags(line)))
 				nonEmptyTitle = true
@@ -436,14 +435,14 @@ class SMakeISV {
 			pendingVerseTitles+=title.toString()
 		}
 	}
-	private def parseRelatedRefTitle(input:BufferedReader, out:StringBuilder) = {
+	private def parseRelatedRefTitle(input:Iterator[String], out:StringBuilder) = {
 		val title = new StringBuilder
 		var nonEmptyTitle = false
 		title.append(CR)
 		title.append(OSIS_SUBSECTION_TITLE_START)
 		var line:String = null
 		do {
-			line = input.readLine()
+			line = input.next
 			if (line.contains(TEXT)) {
 				title.append(fixUpText(trimTags(line)))
 				nonEmptyTitle = true
@@ -469,14 +468,14 @@ class SMakeISV {
 		isNewParagraphRequired = true
 	}
 	
-	private def parseVerseNo(input:BufferedReader, out:StringBuilder):Unit = {
+	private def parseVerseNo(input:Iterator[String], out:StringBuilder):Unit = {
 		checkVerseEnded(out)
 		
 		out.append(CR)
 		var verseNo:Int = -1
 		var line:String = null
 		do {
-			line = input.readLine()
+			line = input.next
 			if (handleUnusualLine(line, input, out)) {
 				return
 			}
@@ -507,21 +506,7 @@ class SMakeISV {
 		isVerseEnded = false
 	}
 	
-//	private def parseVerse(input:BufferedReader, out:StringBuilder) throws IOException {
-//		line:String = null
-//		do {
-//			line = input.readLine()
-//			if (line.contains(TEXT)) {
-//				out.append(trimTags(fixUpText(line)))
-//			} else if (line.contains(BEFORE_FOOTNOTE)) {
-//				parseFootnote(input, out)
-//			}
-//		} while (!line.contains(END))
-//
-//		out.append(CR)
-//	}
-
-	private def parseFootnote(input:BufferedReader, out:StringBuilder) = {
+	private def parseFootnote(input:Iterator[String], out:StringBuilder) = {
 		var line:String = null
 		if (debug) {
 			println("footnote:"+footnoteNo)
@@ -529,7 +514,7 @@ class SMakeISV {
 		var footnoteChar = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(footnoteNo) 
 		out.append(OSIS_PRE_FOOTNOTE.format(footnoteChar, getVerseOSISId))
 		do {
-			line = input.readLine()
+			line = input.next
 			if (line.contains(TEXT)) {
 				out.append(trimTags(line))
 			}
@@ -565,7 +550,7 @@ class SMakeISV {
                   <w:pStyle w:val="StylePsalmLine210pt" />
 		 */
 	var currentPoetryLevel = 0
-	private def startPoetryLine(input:BufferedReader, out:StringBuilder, line:String) = {
+	private def startPoetryLine(input:Iterator[String], out:StringBuilder, line:String) = {
 //		// delay writing tags to avoid putting opening <lg><l> in previous verse
 //		flushPendingPoetryStartTags(out)
 		
@@ -603,7 +588,7 @@ class SMakeISV {
 		if (isLastLine) {
 			flushPendingPoetryStartTags(out)
 			var verseLine = ""
-			while ({verseLine = input.readLine(); !verseLine.contains(END)}) {
+			while ({verseLine = input.next; !verseLine.contains(END)}) {
 	
 				if (verseLine.contains(BEFORE_FOOTNOTE)) {
 					parseFootnote(input, out)
@@ -635,10 +620,10 @@ class SMakeISV {
 		currentPoetryLevel = 0
 	}
 
-	private def ignore(input:BufferedReader, until:String) = {
+	private def ignore(input:Iterator[String], until:String) = {
 		var line:String = null
 		do {
-			line = input.readLine()
+			line = input.next
 		} while (!line.contains(until))
 	}
 

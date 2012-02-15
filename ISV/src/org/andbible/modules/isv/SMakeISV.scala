@@ -136,7 +136,7 @@ class SMakeISV {
 	var footnoteNo = 0
 	// e.g. "<note n=\"1\" osisID=\"Gen.1.26!note.1\" osisRef=\"Gen.1.26\" type=\"explanation\">"
 	// 1= note no; 2=OsisId
-	val OSIS_PRE_FOOTNOTE = "<note n=\"%1$d\" osisID=\"%2$s!note.%1$d\" osisRef=\"%2$s\" type=\"explanation\">"
+	val OSIS_PRE_FOOTNOTE = "<note n=\"%1$s\" osisID=\"%2$s!note.%1$s\" osisRef=\"%2$s\" type=\"explanation\">"
 	val OSIS_POST_FOOTNOTE = "</note>"
 	val BEFORE_FOOTNOTE = "<w:footnote>"
     val BEFORE_FOOTNOTE_TEXT = "<w:pStyle w:val=\"FootnoteText\" />"
@@ -180,6 +180,8 @@ class SMakeISV {
 		
 	var currentQuotesID:Int = 1
 
+	val wordCheck = new DictionaryCheck
+	
 	def doit(): Unit = {
 		try {
 			println("Starting")
@@ -204,7 +206,7 @@ class SMakeISV {
 				
 				out.append(OSIS_BIBLE_START)
 				while ({line = input.readLine(); line != null}) {
-//					debug = (getVerseOSISId.equals("Luke.1.78") || getVerseOSISId.equals("Luke.1.77"))
+//					debug = (getVerseOSISId.startsWith("3John"))
 //					if (debug) {
 //						println("Line"+line)
 //					}
@@ -270,6 +272,7 @@ class SMakeISV {
 //				for (i <- 1 to 3) {
 //					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
 //				}
+				wordCheck.printUniqueWords()
 			} finally {
 				input.close()
 			}
@@ -287,6 +290,8 @@ class SMakeISV {
 		if (isText(line)) {
 			var text = fixUpText(trimTags(line))
 			out.append(text)
+			
+			wordCheck.add(text)
 
 //			// joining all text together sometimes merges words so add a space
 //			out.append(" ")
@@ -346,6 +351,9 @@ class SMakeISV {
 			// skip pre-amble because it confuses
 			skipNTPreamble(input)
 		}
+
+		// reset note counter after every book
+		footnoteNo = 0
 	}
 	
 	private def skipNTPreamble(input:BufferedReader) = {
@@ -515,8 +523,11 @@ class SMakeISV {
 
 	private def parseFootnote(input:BufferedReader, out:StringBuilder) = {
 		var line:String = null
-		footnoteNo = footnoteNo+1
-		out.append(OSIS_PRE_FOOTNOTE.format(footnoteNo, getVerseOSISId))
+		if (debug) {
+			println("footnote:"+footnoteNo)
+		}
+		var footnoteChar = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(footnoteNo) 
+		out.append(OSIS_PRE_FOOTNOTE.format(footnoteChar, getVerseOSISId))
 		do {
 			line = input.readLine()
 			if (line.contains(TEXT)) {
@@ -525,6 +536,7 @@ class SMakeISV {
 		} while (!line.contains(END))
 		out.append(OSIS_POST_FOOTNOTE)
 		out.append(CR)
+		footnoteNo = footnoteNo+1
 	}
 	
 	private def getVerseOSISId:String = {

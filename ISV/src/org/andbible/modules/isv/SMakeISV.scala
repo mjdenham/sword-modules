@@ -128,10 +128,12 @@ class SMakeISV {
 	var isParagraphClosed = true
 	var isNewParagraphRequired = false
 	
+	// verses excluded fron ISV: Gen.27.7, Exod.10.8, Exod.25.2, Lev.1.2, Num.5.31, Num.25.9
+	// mistakes Lev.22.11 occurred twice the second should have been 12
 	val OSIS_VERSE = "<verse osisID=\"%1$s.%2$d.%3$d\" sID=\"%1$s.%2$d.%3$d\"/>"
 	val OSIS_VERSE_END = "<verse eID=\"%1$s.%2$d.%3$d\"/>"
 	val BEFORE_VERSE_NO = "<w:rStyle w:val=\"Verse\" />"
-
+	val BEFORE_VERSE_NO_ALT = "<w:vertAlign w:val=\"superscript\" />"
 	val BEFORE_VERSE = "<w:r wsp:rsidRPr="
 	
 	var footnoteNo = 0
@@ -140,6 +142,7 @@ class SMakeISV {
 	val OSIS_PRE_FOOTNOTE = "<note n=\"%1$s\" osisID=\"%2$s!note.%1$s\" osisRef=\"%2$s\" type=\"explanation\">"
 	val OSIS_POST_FOOTNOTE = "</note>"
 	val BEFORE_FOOTNOTE = "<w:footnote>"
+	val BEFORE_FOOTNOTE_ALT = "<w:rStyle w:val=\"FootnoteReference\" />"
     val BEFORE_FOOTNOTE_TEXT = "<w:pStyle w:val=\"FootnoteText\" />"
 
     	
@@ -197,18 +200,17 @@ class SMakeISV {
 	private def process(aFile: File):String = {
 		// ...checks on aFile are elided
 		var resultStr = ""
+		var source = Source.fromFile(aFile)
+		var inputIter:Iterator[String] = source.getLines
 		try {
 			var out = new StringBuilder()
 			var line:String = null // not declared within while loop
-			
 			out.append(OSIS_BIBLE_START)
-			var source = Source.fromFile(aFile)
-			var inputIter:Iterator[String] = source.getLines
 			for (line <- inputIter) {
-//					debug = (getVerseOSISId.startsWith("3John"))
-//					if (debug) {
-//						println("Line"+line)
-//					}
+				debug = (getVerseOSISId.startsWith("Nah.1.15"))
+				if (debug) {
+					println("Line"+line)
+				}
 				if (handleUnusualLine(line, inputIter, out)) {
 					// handled above
 				} else if (line.contains(BEFORE_BOOK)) {
@@ -224,18 +226,15 @@ class SMakeISV {
 				} else if (line.contains(BEFORE_PARAGRAPH_1) && line.contains(BEFORE_PARAGRAPH_2)) {
 					// poetry tags include new lines in them
 					if (!isInPoetry) {
-						if (debug) {
-							println("New paragraph")
-						}
 						newParagraph(out)
 					}
-				} else if (line.contains(BEFORE_VERSE_NO)) {
+				} else if (line.contains(BEFORE_VERSE_NO) || line.contains(BEFORE_VERSE_NO_ALT)) {
 					parseVerseNo(inputIter, out)
 				} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
 					startPoetryLine(inputIter, out, line)
-//					} else if (line.contains(BEFORE_VERSE)) {
-//						parseVerse(inputIter, out)
-				} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
+//				} else if (line.contains(BEFORE_VERSE)) {
+//					parseVerse(inputIter, out)
+				} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT) || line.contains(BEFORE_FOOTNOTE_ALT)) {
 					parseFootnote(inputIter, out)
 // ignore WOC for now because too many errors in q nesting					
 				} else if (line.contains(BEFORE_WOC_RED)) {
@@ -257,7 +256,6 @@ class SMakeISV {
 				}
 				
 			}
-			source.close()
 			out.append(OSIS_BIBLE_END)
 			
 			resultStr = out.toString()
@@ -268,15 +266,15 @@ class SMakeISV {
 								  .replace(SMALLCAPS+"LORD", "<divineName>Lord</divineName>")
 								  .replace("L"+SMALLCAPS+"ORD", "<divineName>Lord</divineName>")
 								  .replace(SMALLCAPS, "")
-			// I don't know why there are duplicated line breaks throughout
 //				for (i <- 1 to 3) {
 //					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
 //				}
-			wordCheck.printUniqueWords()
+
+//				wordCheck.printUniqueWords()
 		} catch {
-		  case e:Exception => e.printStackTrace()
+			case e:Exception => e.printStackTrace()
 		} finally {
-//				inputIter.close()
+			source.close()
 		}
 
 		return resultStr
@@ -411,6 +409,9 @@ class SMakeISV {
 		out.append(CR)
 		out.append(OSIS_CHAPTER.format(mCurrentBook, mCurrentChapter))
 		
+		if (debug) {
+			println("chap:"+mCurrentChapter)
+		}
 		//reset quoteID counter
 //		currentQuotesID = 1;
 	}
@@ -508,9 +509,6 @@ class SMakeISV {
 	
 	private def parseFootnote(input:Iterator[String], out:StringBuilder) = {
 		var line:String = null
-		if (debug) {
-			println("footnote:"+footnoteNo)
-		}
 		var footnoteChar = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(footnoteNo) 
 		out.append(OSIS_PRE_FOOTNOTE.format(footnoteChar, getVerseOSISId))
 		do {
@@ -592,7 +590,7 @@ class SMakeISV {
 	
 				if (verseLine.contains(BEFORE_FOOTNOTE)) {
 					parseFootnote(input, out)
-				} else if (verseLine.contains(BEFORE_VERSE_NO)) {
+				} else if (verseLine.contains(BEFORE_VERSE_NO) || line.contains(BEFORE_VERSE_NO_ALT)) {
 					// verse in last line in Job 41:10
 					parseVerseNo(input, out)
 				} else if (verseLine.contains(TEXT)) {

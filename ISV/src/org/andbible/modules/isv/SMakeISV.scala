@@ -58,10 +58,23 @@ object SMakeISV {
 	  new SMakeISV().doit()
 	}
 }
+//TODO <milestone type="cQuote"/> represents continuation quote
+//TODO Red Letter
+//TODO investigate use of use anti-xml
 
+//TODO space missing in Jer.2.2 Lordsays:
+//TODO move <lg><l> after verse start and title = see next 3 lines
+//<lg><l level='1'>
+//<verse osisID="Ps.6.1" sID="Ps.6.1"/>
+//<title subType="x-preverse" type="section">A Prayer in Times of Trouble</title><divineName>Lord</divineName>, in your anger
+//TODO also
+//<lg><l level='1'><verse eID="Eccl.7.27"/>
+//<verse osisID="Eccl.7.28" sID="Eccl.7.28"/>Among the thi
+//Also remove redundant lg, l1, /l1, /lg after above reordering
 class SMakeISV {
 
-	val quick = true
+	var debug = false
+	val quick = false
 	
 	val CR = System.getProperty("line.separator")
 	val OSIS_BIBLE_START =
@@ -191,6 +204,10 @@ class SMakeISV {
 				
 				out.append(OSIS_BIBLE_START)
 				while ({line = input.readLine(); line != null}) {
+//					debug = (getVerseOSISId.equals("Luke.1.78") || getVerseOSISId.equals("Luke.1.77"))
+//					if (debug) {
+//						println("Line"+line)
+//					}
 					if (handleUnusualLine(line, input, out)) {
 						// handled above
 					} else if (line.contains(BEFORE_BOOK)) {
@@ -206,6 +223,9 @@ class SMakeISV {
 					} else if (line.contains(BEFORE_PARAGRAPH_1) && line.contains(BEFORE_PARAGRAPH_2)) {
 						// poetry tags include new lines in them
 						if (!isInPoetry) {
+							if (debug) {
+								println("New paragraph")
+							}
 							newParagraph(out)
 						}
 					} else if (line.contains(BEFORE_VERSE_NO)) {
@@ -226,12 +246,13 @@ class SMakeISV {
 						out.append(SMALLCAPS)
 					} else if (line.contains(IGNORE_1)) {
 						ignore(input, IGNORE_1_END)
-					} else {
+					} else if (isText(line)) {
+						
 						// write any delayed tags before the actual text is written
 						checkIfParagraphRequired(out)
 						flushPendingPoetryStartTags(out)
 						
-						printIfText(line, out)
+						printText(line, out)
 					}
 					
 				}
@@ -246,9 +267,9 @@ class SMakeISV {
 									  .replace("L"+SMALLCAPS+"ORD", "<divineName>Lord</divineName>")
 									  .replace(SMALLCAPS, "")
 				// I don't know why there are duplicated line breaks throughout
-				for (i <- 1 to 3) {
-					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
-				}
+//				for (i <- 1 to 3) {
+//					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
+//				}
 			} finally {
 				input.close()
 			}
@@ -259,8 +280,11 @@ class SMakeISV {
 		return resultStr
 	}
 
-	private def printIfText(line:String, out:StringBuilder) = {
-		if (line.contains(TEXT)) {
+	private def isText(line:String) = {
+		line.contains(TEXT)
+	}
+	private def printText(line:String, out:StringBuilder) = {
+		if (isText(line)) {
 			var text = fixUpText(trimTags(line))
 			out.append(text)
 
@@ -456,7 +480,7 @@ class SMakeISV {
 				} catch {
 				  case e:Exception => {
 				 	  println("Warning:Text in place of verse:"+line)
-				 	  printIfText(line, out);
+				 	  printText(line, out);
 				  }
 				}
 			}
@@ -509,7 +533,11 @@ class SMakeISV {
 		} catch {
 		  case e:Exception => {
 			println("Error generating note "+mCurrentBook+":"+mCurrentChapter+":"+mCurrentVerseNo)
-			return mCurrentBook.getOSIS()+"."+mCurrentChapter+"."+mCurrentVerseNo
+			if (mCurrentBook!=null) {
+				return mCurrentBook.getOSIS()+"."+mCurrentChapter+"."+mCurrentVerseNo
+			} else {
+				return "unknown"
+			}
 		  }
 		}
 	}
@@ -526,8 +554,8 @@ class SMakeISV {
 		 */
 	var currentPoetryLevel = 0
 	private def startPoetryLine(input:BufferedReader, out:StringBuilder, line:String) = {
-		// delay writing tags to avoid putting opening <lg><l> in previous verse
-		flushPendingPoetryStartTags(out)
+//		// delay writing tags to avoid putting opening <lg><l> in previous verse
+//		flushPendingPoetryStartTags(out)
 		
 		var levelStr = line.charAt(line.indexOf("PsalmLine")+9).toString()
 		var indentationLevel = Integer.parseInt(levelStr);

@@ -14,46 +14,6 @@ import org.crosswire.jsword.passage.Verse
 import org.crosswire.jsword.passage.KeyUtil
 import scala.io.Source
 
-/**
-* remove all semi-colons
-* remove 'final' before class variables
-* add def before methods
-* 
-* 
-* optional
-* fields are private so remove private before fields
-
- */
-
-/**
- * convert simple text to Sword Gen Book
- * 
- * Example from ESV
- * 
-<verse osisID='Phil.1.3'/>
-<title subType="x-preverse" type="section">Thanksgiving and Prayer</title>
-<note n="e" osisID="Phil.1.3!crossReference.e" osisRef="Phil.1.3" type="crossReference">See <reference osisRef="Rom.1.8">Rom. 1:8</reference></note>
-I thank my God 
-<note n="f" osisID="Phil.1.3!crossReference.f" osisRef="Phil.1.3" type="crossReference">
-	<reference osisRef="Rom.1.9">Rom. 1:9</reference> 
-	<reference osisRef="Eph.1.16">Eph. 1:16</reference> 
-	<reference osisRef="2Tim.1.3">2 Tim. 1:3</reference>
-</note>
-in all my remembrance of you,
-
- * 
- * @author denha1m
- * 
- */
-
-/**
- * TODO
- * the first title is blank and must be removed
- *      <title subType="x-preverse" type="section"></title>
- 
- * @author denha1m
- *
- */
 object SMakeISV {
 	def main(args: Array[String]): Unit = {
 	  new SMakeISV().doit()
@@ -105,7 +65,8 @@ class SMakeISV {
 	var mCurrentChapter = 0
 	var mCurrentVerseNo = 0
 	var isVerseEnded = true
-	
+
+	var isBetweenBooks = true;
 	val BEFORE_BOOK = "<w:pStyle w:val=\"Heading3\" />"
 	val AFTER_BOOK = "</wx:sect>"
 
@@ -128,12 +89,15 @@ class SMakeISV {
 	var isParagraphClosed = true
 	var isNewParagraphRequired = false
 	
-	// verses excluded fron ISV: Gen.27.7, Exod.10.8, Exod.25.2, Lev.1.2, Num.5.31, Num.25.9
+	// verses excluded fron ISV: Gen.27.7, Exod.10.8, Exod.25.2, Lev.1.2, Num.5.31, Num.25.9, Ezek.4.7, Ezek.21.16, Ezek.24.5, Ezek.24.8, Ezek.34.10, Ps.135.2
 	// mistakes Lev.22.11 occurred twice the second should have been 12
+	// Ezek.13.13 is marked as verse 3
+	// 2Chr.18.25 is marked as verse 24
 	val OSIS_VERSE = "<verse osisID=\"%1$s.%2$d.%3$d\" sID=\"%1$s.%2$d.%3$d\"/>"
 	val OSIS_VERSE_END = "<verse eID=\"%1$s.%2$d.%3$d\"/>"
 	val BEFORE_VERSE_NO = "<w:rStyle w:val=\"Verse\" />"
-	val BEFORE_VERSE_NO_ALT = "<w:vertAlign w:val=\"superscript\" />"
+	val BEFORE_VERSE_NO_SOMETIMES = "<w:vertAlign w:val=\"superscript\" />"
+
 	val BEFORE_VERSE = "<w:r wsp:rsidRPr="
 	
 	var footnoteNo = 0
@@ -142,7 +106,6 @@ class SMakeISV {
 	val OSIS_PRE_FOOTNOTE = "<note n=\"%1$s\" osisID=\"%2$s!note.%1$s\" osisRef=\"%2$s\" type=\"explanation\">"
 	val OSIS_POST_FOOTNOTE = "</note>"
 	val BEFORE_FOOTNOTE = "<w:footnote>"
-	val BEFORE_FOOTNOTE_ALT = "<w:rStyle w:val=\"FootnoteReference\" />"
     val BEFORE_FOOTNOTE_TEXT = "<w:pStyle w:val=\"FootnoteText\" />"
 
     	
@@ -207,10 +170,10 @@ class SMakeISV {
 			var line:String = null // not declared within while loop
 			out.append(OSIS_BIBLE_START)
 			for (line <- inputIter) {
-				debug = (getVerseOSISId.startsWith("Nah.1.15"))
-				if (debug) {
-					println("Line"+line)
-				}
+//					debug = (getVerseOSISId.startsWith("Nah.1.15"))
+//					if (debug) {
+//						println("Line"+line)
+//					}
 				if (handleUnusualLine(line, inputIter, out)) {
 					// handled above
 				} else if (line.contains(BEFORE_BOOK)) {
@@ -228,13 +191,14 @@ class SMakeISV {
 					if (!isInPoetry) {
 						newParagraph(out)
 					}
-				} else if (line.contains(BEFORE_VERSE_NO) || line.contains(BEFORE_VERSE_NO_ALT)) {
+				} else if (line.contains(BEFORE_VERSE_NO) || 
+						(line.contains(BEFORE_VERSE_NO_SOMETIMES) && ("Gen".equals(mCurrentBook.getOSIS()) || "Ezek".equals(mCurrentBook.getOSIS() )))) {
 					parseVerseNo(inputIter, out)
 				} else if (line.contains(BEFORE_PSALM_LINE_ANY)) {
 					startPoetryLine(inputIter, out, line)
-//				} else if (line.contains(BEFORE_VERSE)) {
-//					parseVerse(inputIter, out)
-				} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT) || line.contains(BEFORE_FOOTNOTE_ALT)) {
+//					} else if (line.contains(BEFORE_VERSE)) {
+//						parseVerse(inputIter, out)
+				} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
 					parseFootnote(inputIter, out)
 // ignore WOC for now because too many errors in q nesting					
 				} else if (line.contains(BEFORE_WOC_RED)) {
@@ -247,12 +211,15 @@ class SMakeISV {
 				} else if (line.contains(IGNORE_1)) {
 					ignore(inputIter, IGNORE_1_END)
 				} else if (isText(line)) {
-					
-					// write any delayed tags before the actual text is written
-					checkIfParagraphRequired(out)
-					flushPendingPoetryStartTags(out)
-					
-					printText(line, out)
+					if (isBetweenBooks) {
+						println("Discarding:"+line)
+					} else {
+						// write any delayed tags before the actual text is written
+						checkIfParagraphRequired(out)
+						flushPendingPoetryStartTags(out)
+						
+						printText(line, out)
+					}
 				}
 				
 			}
@@ -269,12 +236,11 @@ class SMakeISV {
 //				for (i <- 1 to 3) {
 //					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
 //				}
-
-//				wordCheck.printUniqueWords()
+//			wordCheck.printUniqueWords()
 		} catch {
-			case e:Exception => e.printStackTrace()
+		  case e:Exception => e.printStackTrace()
 		} finally {
-			source.close()
+				source.close()
 		}
 
 		return resultStr
@@ -309,6 +275,7 @@ class SMakeISV {
 	}
 
 	private def parseBook(input:Iterator[String], out:StringBuilder) = {
+		isBetweenBooks = false;
 		out.append(CR)
 		var book:BibleBook = null
 		var bookName = ""
@@ -349,6 +316,7 @@ class SMakeISV {
 			skipNTPreamble(input)
 		}
 
+		isBetweenBooks = true;
 		// reset note counter after every book
 		footnoteNo = 0
 	}
@@ -527,7 +495,7 @@ class SMakeISV {
 			return new Verse(mCurrentBook, mCurrentChapter, mCurrentVerseNo).getOsisID()
 		} catch {
 		  case e:Exception => {
-			println("Error generating note "+mCurrentBook+":"+mCurrentChapter+":"+mCurrentVerseNo)
+			println("Error getting OSIS id "+mCurrentBook+":"+mCurrentChapter+":"+mCurrentVerseNo)
 			if (mCurrentBook!=null) {
 				return mCurrentBook.getOSIS()+"."+mCurrentChapter+"."+mCurrentVerseNo
 			} else {
@@ -590,7 +558,7 @@ class SMakeISV {
 	
 				if (verseLine.contains(BEFORE_FOOTNOTE)) {
 					parseFootnote(input, out)
-				} else if (verseLine.contains(BEFORE_VERSE_NO) || line.contains(BEFORE_VERSE_NO_ALT)) {
+				} else if (verseLine.contains(BEFORE_VERSE_NO)) {
 					// verse in last line in Job 41:10
 					parseVerseNo(input, out)
 				} else if (verseLine.contains(TEXT)) {
@@ -665,7 +633,7 @@ class SMakeISV {
 							.replace("&#195;&#173;", "i")	// i acute e.g. in last chapter of Ezra v38: Baní, Binai, Shihezi
 							.replace("&#195;&#175;", "i")	// accented i as in naive 
 							.replace("&#195;&#169;", "e")	// accented e as in last e of naivite 
-							.replace("&#166;", "...") // ellipses e.g. Gen 18:31
+							.replace("&#226;&#8364;&#166;", "...") // ellipses e.g. Gen 18:31
 							.replace("&#239;&#187;&#191;", "") // this doesn't seem to be anything
 							.replace("&#194; ", "") // this doesn't seem to be anything
 
@@ -693,7 +661,7 @@ class SMakeISV {
 	var quoteID:Int = 0
 	def getQ(opening:Boolean):String = {
 		var retVal = ""
-		if (opening == isOpenQ ) {
+		if ((opening && isOpenQ) || (!opening && !isOpenQ) ) {
 			println("ERROR in Q:"+mCurrentBook+" "+mCurrentChapter+" "+mCurrentVerseNo)
 		}
 		
@@ -702,7 +670,7 @@ class SMakeISV {
 			woc =  " who=\"Jesus\""
 		}
 		
-		if (!isOpenQ) {
+		if (opening) {
 			isOpenQ = true
 			quoteID = quoteID + 1
 			retVal = "<q marker='\"' sID='"+quoteID+"' />"

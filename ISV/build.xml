@@ -95,13 +95,6 @@
 		</zip>
 	</target>
 
-	<target name="tar-gz-mods">
-		<tar destfile="${tar.gz.dir}/mods.d.tar">
-			<zipfileset dir="${mods.d.dir}" prefix="mods.d"/>
-		</tar>
-		<gzip destfile="${tar.gz.dir}/mods.d.tar.gz" src="${tar.gz.dir}/mods.d.tar"/>
-	</target>
-
 	<target name="adb-push" depends="osis2mod">
 		<exec executable="${adb}">
 			<arg value="push"/>

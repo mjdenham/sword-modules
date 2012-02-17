@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="libs/commons-io-2.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang-2.5.jar"/>
 	<classpathentry kind="lib" path="libs/hamcrest-all-1.2.jar"/>
-	<classpathentry kind="lib" path="libs/jsword-all-tweaked.jar" sourcepath="/jsword/src/main/java"/>
+	<classpathentry kind="lib" path="libs/jsword-all-tweaked.jar"/>
 	<classpathentry kind="lib" path="libs/junit-dep-4.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

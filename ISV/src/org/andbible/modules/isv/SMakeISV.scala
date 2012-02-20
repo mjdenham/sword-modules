@@ -170,10 +170,10 @@ class SMakeISV {
 			var line:String = null // not declared within while loop
 			out.append(OSIS_BIBLE_START)
 			for (line <- inputIter) {
-//					debug = (getVerseOSISId.startsWith("Nah.1.15"))
-//					if (debug) {
-//						println("Line"+line)
-//					}
+					debug = (getVerseOSISId.startsWith("Exod.15.17"))
+					if (debug) {
+						println("Line"+line)
+					}
 				if (handleUnusualLine(line, inputIter, out)) {
 					// handled above
 				} else if (line.contains(BEFORE_BOOK)) {
@@ -226,13 +226,22 @@ class SMakeISV {
 			out.append(OSIS_BIBLE_END)
 			
 			resultStr = out.toString()
-			resultStr = resultStr.replace(SMALLCAPS+"Lord", " Lord ")
-								  .replace("L"+SMALLCAPS+"ord", " Lord ")
-								  .replace(SMALLCAPS+"God", " God ")
-								  .replace("G"+SMALLCAPS+"od", " God ")
+			resultStr = resultStr.replaceAll(SMALLCAPS+"Lord([a-zA-Z])", "Lord $1")
+								  .replaceAll("([a-zA-Z])"+SMALLCAPS+"Lord", "$1 Lord")
+								  .replace(SMALLCAPS+"Lord", "Lord")
+								  
+								  .replaceAll("L"+SMALLCAPS+"ord([a-zA-Z])", "Lord $1")
+								  .replaceAll("([a-zA-Z])L"+SMALLCAPS+"ord", "$1 Lord")
+								  .replace("L"+SMALLCAPS+"ord", "Lord")
+
+								  .replace(SMALLCAPS+"God", "God")
+								  .replace("G"+SMALLCAPS+"od", "God")
 								  .replace(SMALLCAPS+"LORD", "<divineName>Lord</divineName>")
 								  .replace("L"+SMALLCAPS+"ORD", "<divineName>Lord</divineName>")
 								  .replace(SMALLCAPS, "")
+						// often the formatting around Lord prevents the trailing space which was added above but sometimes incorrectly
+//			resultStr = resultStr.replace("Lord 's", "Lord's")
+
 //				for (i <- 1 to 3) {
 //					resultStr = resultStr.replace(OSIS_PARAGRAPH_END+OSIS_PARAGRAPH_END, OSIS_PARAGRAPH_END)
 //				}
@@ -562,7 +571,7 @@ class SMakeISV {
 					// verse in last line in Job 41:10
 					parseVerseNo(input, out)
 				} else if (verseLine.contains(TEXT)) {
-					out.append( fixUpText(trimTags(verseLine)).trim() )
+					out.append( fixUpText(trimTags(verseLine)) )
 				}
 			}
 			checkPoetryLinesClosed(out)

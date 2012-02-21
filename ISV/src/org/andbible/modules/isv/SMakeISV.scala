@@ -491,7 +491,7 @@ class SMakeISV {
 		do {
 			line = input.next
 			if (line.contains(TEXT)) {
-				out.append(trimTags(line))
+				out.append(fixUpText(trimTags(line)))
 			}
 		} while (!line.contains(END))
 		out.append(OSIS_POST_FOOTNOTE)

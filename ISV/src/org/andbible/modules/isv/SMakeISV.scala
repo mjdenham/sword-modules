@@ -170,10 +170,10 @@ class SMakeISV {
 			var line:String = null // not declared within while loop
 			out.append(OSIS_BIBLE_START)
 			for (line <- inputIter) {
-					debug = (getVerseOSISId.startsWith("Exod.15.17"))
-					if (debug) {
-						println("Line"+line)
-					}
+//					debug = (getVerseOSISId.startsWith("Exod.15.17"))
+//					if (debug) {
+//						println("Line"+line)
+//					}
 				if (handleUnusualLine(line, inputIter, out)) {
 					// handled above
 				} else if (line.contains(BEFORE_BOOK)) {

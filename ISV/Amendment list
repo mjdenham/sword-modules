@@ -6,4 +6,4 @@ Remove extra spaces from around Lord e.g. the "Lord 's"; "Lord ," (Ex 3:16)
 Unmerge words occurring in LastPsalmLine e.g. Exod.15.18 'TheLordwill reign' - coding error
 Unmerge words for which there are 2 occurrences - unexpected but a few - Word export error
 Correct unusual characters in Notes - corrected in text already but missed Notes
-
+Delete hidden '4' at the end of Luke.17.4 - error in word doc hidden by white on white formatting

@@ -74,6 +74,9 @@ class SMakeISV {
 	val OSIS_CHAPTER_END = "</chapter>"
 	val BEFORE_CHAPTER_NO = "<w:pStyle w:val=\"Heading4\" />"
 
+	// check poetry etc terminated
+	val AFTER_SECTION = "</wx:sub-section>"
+		
 	var pendingVerseTitles = new ListBuffer[String]
 	val OSIS_SECTION_TITLE_START = "<title subType=\"x-preverse\" type=\"section\">";
 	val OSIS_SUBSECTION_TITLE_START = "<title subType=\"x-preverse\" type=\"section\" level=\"2\">";
@@ -170,7 +173,7 @@ class SMakeISV {
 			var line:String = null // not declared within while loop
 			out.append(OSIS_BIBLE_START)
 			for (line <- inputIter) {
-//					debug = (getVerseOSISId.startsWith("Exod.15.17"))
+//					debug = (getVerseOSISId.startsWith("Exod.15.25"))
 //					if (debug) {
 //						println("Line"+line)
 //					}
@@ -198,6 +201,8 @@ class SMakeISV {
 					startPoetryLine(inputIter, out, line)
 //					} else if (line.contains(BEFORE_VERSE)) {
 //						parseVerse(inputIter, out)
+				} else if (line.contains(AFTER_SECTION)) {
+					checkPoetryLinesClosed(out)
 				} else if (line.contains(BEFORE_FOOTNOTE) || line.contains(BEFORE_FOOTNOTE_TEXT)) {
 					parseFootnote(inputIter, out)
 // ignore WOC for now because too many errors in q nesting					
@@ -587,6 +592,7 @@ class SMakeISV {
 	}
 	
 	private def checkPoetryLinesClosed(out:StringBuilder) {
+		flushPendingPoetryStartTags(out)
 		isInPoetry = false
 		if (currentPoetryLevel>0) {
 			out.append(OSIS_POST_PSALM_LINE)

@@ -173,7 +173,7 @@ class SMakeISV {
 			var line:String = null // not declared within while loop
 			out.append(OSIS_BIBLE_START)
 			for (line <- inputIter) {
-//					debug = (getVerseOSISId.startsWith("Exod.15.25"))
+//					debug = (getVerseOSISId.startsWith("Prov.2.2"))
 //					if (debug) {
 //						println("Line"+line)
 //					}
@@ -484,6 +484,11 @@ class SMakeISV {
 	}
 
 	private def newVerse(out:StringBuilder, verseNo:Int) {
+		// add a missing empty verse
+		if (verseNo>mCurrentVerseNo+1) {
+			 println("Warning: Missing verse after:"+getVerseOSISId)
+		}
+		
 		mCurrentVerseNo = verseNo
 		out.append(makeVerseStartTag())
 		isVerseEnded = false

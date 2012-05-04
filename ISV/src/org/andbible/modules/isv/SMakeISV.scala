@@ -142,10 +142,14 @@ class SMakeISV {
 //	val OSIS_POST_WOC = "</q>"
 	val BEFORE_WOC_RED = "<w:color w:val=\"FF0000\" />"
 	
+	val SELAH_LINE = "<w:t>Interlude</w:t>"
+	val BEFORE_SELAH = "<lb/>"+CR
+	val AFTER_SELAH = ".<lb/>"+CR
+	  
 	val IGNORE_1 = "<w:sectPr wsp:rsidR=\""
 	val IGNORE_1_END = "</w:sectPr>"
 
-	// mising out the opening '<' allows teh text to be spread over 2 lines e.g. 2Kgs.7.12
+	// mising out the opening '<' allows the text to be spread over 2 lines e.g. 2Kgs.7.12
 	val TEXT = "w:t>"
 		
 	var currentQuotesID:Int = 1
@@ -213,6 +217,8 @@ class SMakeISV {
 				} else if (line.contains(SMALLCAPS)) {
 					// leave as a placeholder for replacement later after all text has been merged
 					out.append(SMALLCAPS)
+				} else if (line.contains(SELAH_LINE)) {
+					printSelah(line, out)
 				} else if (line.contains(IGNORE_1)) {
 					ignore(inputIter, IGNORE_1_END)
 				} else if (isText(line)) {
@@ -258,6 +264,15 @@ class SMakeISV {
 		}
 
 		return resultStr
+	}
+
+	private def printSelah(line:String, out:StringBuilder) = {
+		if (isText(line)) {
+			var text = fixUpText(trimTags(line))
+			out.append(BEFORE_SELAH)
+			   .append(text)
+			   .append(AFTER_SELAH)
+		}
 	}
 
 	private def isText(line:String) = {

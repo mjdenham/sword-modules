@@ -33,7 +33,9 @@ public class OldeEnglishModerniser {
 	private static List<OldAndModern> oldAndModernWordList;
 	
 	private static String[] REMOVE_ETH_ADD_S = new String[] {
-			"belongeth","claspeth","concerneth","containeth","delighteth","falleth","followeth","hasteneth","joyeth","knoweth","lighteth","rejecteth","reneweth","resteth","soaketh","showeth","trusteth","worketh","manifesteth","comprehendeth","profiteth","exhibiteth","dwelleth","inhabiteth",
+			"administereth","beareth","belongeth","claspeth","comforteth","concerneth","constraineth","consumeth","containeth","delighteth","denoteth","fainteth","falleth","followeth",
+			"hasteneth","joyeth","knoweth","lighteth","rejecteth","reneweth","resteth","soaketh","showeth","trusteth","worketh","manifesteth","comprehendeth","profiteth","exhibiteth",
+			"dwelleth","festereth","fighteth","lusteth","melteth","inhabiteth",
 			"asketh","thirsteth","longeth","existeth","designeth","looketh","differeth","consisteth","aboundeth","groaneth","standeth","panteth","subsisteth",
 			"proceedeth","bringeth","bloweth","listeth","aimeth","heareth","discerneth","healeth","redeemeth","crowneth","expecteth","findeth",
 			"assigneth","calleth","casteth","commendeth","exceedeth","exerteth","faileth","feeleth","honoureth","insisteth","intendeth","keepeth","mindeth",
@@ -42,7 +44,7 @@ public class OldeEnglishModerniser {
 	
 	private static String[] REMOVE_ETH_ADD_ES = new String[] {
 			"amazeth","ariseth","chooseth","cometh","confesseth","continueth","declareth","desireth","dieth","discourseth","distinguisheth","doeth","embraceth","fixeth","goeth",
-			"perplexeth","presseth","produceth","professeth","rejoiceth","requireth","urgeth","perisheth","lieth","receiveth","conduceth","taketh",
+			"perplexeth","presseth","produceth","professeth","purgeth","rejoiceth","requireth","urgeth","perisheth","lieth","receiveth","conduceth","taketh",
 			"passeth","maketh","shineth","expresseth","reproacheth","loveth","liveth","abideth","humbleth","causeth","giveth","loseth","testifieth","becometh",
 			"carrieth","reduceth","ceaseth","pleaseth","sanctifieth","ravisheth","communicateth","teacheth","hideth","refresheth","riseth",
 			"extinguisheth","proposeth","opposeth","compriseth","promoteth","seduceth","supplieth","wisheth","refuseth","increaseth","surpriseth","intermeddleth",
@@ -84,6 +86,7 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("conjunction", "union"));
 		oldAndModernWordList.add(new OldAndModern("concernment", "concern"));
 		oldAndModernWordList.add(new OldAndModern("concernments", "concerns"));
+		oldAndModernWordList.add(new OldAndModern("intendment", "intention"));
 		oldAndModernWordList.add(new OldAndModern("supportment", "support"));
 		oldAndModernWordList.add(new OldAndModern("disquietment", "disquiet"));
 		oldAndModernWordList.add(new OldAndModern("furnishment", "furnishing"));
@@ -107,7 +110,9 @@ public class OldeEnglishModerniser {
 			oldAndModernWordList.add(new OldAndModern(old, old.substring(0, old.length()-3)+"es"));
 		}
 
+		oldAndModernWordList.add(new OldAndModern("committeth", "commits"));
 		oldAndModernWordList.add(new OldAndModern("putteth", "puts"));
+		oldAndModernWordList.add(new OldAndModern("sinneth", "sins"));
 		oldAndModernWordList.add(new OldAndModern("sitteth", "sits"));
 		oldAndModernWordList.add(new OldAndModern("worshippeth", "worships"));
 	}
@@ -162,7 +167,9 @@ public class OldeEnglishModerniser {
 		}
 		wordETHSet.removeAll(Arrays.asList(REMOVE_ETH_ADD_ES));
 		wordETHSet.removeAll(Arrays.asList(REMOVE_ETH_ADD_S));
+		wordETHSet.remove("committeth");
 		wordETHSet.remove("putteth");
+		wordETHSet.remove("sinneth");
 		wordETHSet.remove("sitteth");
 		wordETHSet.remove("worshippeth");
 		if (wordETHSet.size()>0) {

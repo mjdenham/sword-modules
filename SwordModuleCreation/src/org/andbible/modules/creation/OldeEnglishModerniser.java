@@ -58,18 +58,36 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList = new ArrayList<OldAndModern>();
 		oldAndModernWordList.add(new OldAndModern("howbeit", "nevertheless"));
 		oldAndModernWordList.add(new OldAndModern("saith", "says"));
+		oldAndModernWordList.add(new OldAndModern("art", "are"));
+		oldAndModernWordList.add(new OldAndModern("canst", "can"));
+		oldAndModernWordList.add(new OldAndModern("complainest", "complain"));
+		oldAndModernWordList.add(new OldAndModern("didst", "did"));
 		oldAndModernWordList.add(new OldAndModern("doth", "does"));
+		oldAndModernWordList.add(new OldAndModern("fearest", "fear"));
+		oldAndModernWordList.add(new OldAndModern("fellest", "fell"));
+		oldAndModernWordList.add(new OldAndModern("hadst", "have"));
+		oldAndModernWordList.add(new OldAndModern("hast", "have"));
 		oldAndModernWordList.add(new OldAndModern("herein", "in this"));
 		oldAndModernWordList.add(new OldAndModern("hereof", "of this"));
 		oldAndModernWordList.add(new OldAndModern("herewith", "with this"));
 		oldAndModernWordList.add(new OldAndModern("hereon", "upon this"));
 		oldAndModernWordList.add(new OldAndModern("hereunto", "to this"));
+		oldAndModernWordList.add(new OldAndModern("knowest", "know"));
+		oldAndModernWordList.add(new OldAndModern("livest", "live"));
+		oldAndModernWordList.add(new OldAndModern("mayst", "may"));
+		oldAndModernWordList.add(new OldAndModern("needest", "need"));
+		oldAndModernWordList.add(new OldAndModern("thee", "you"));
 		oldAndModernWordList.add(new OldAndModern("therein", "in that"));
 		oldAndModernWordList.add(new OldAndModern("thereof", "of that"));
 		oldAndModernWordList.add(new OldAndModern("therewithal", "with that"));
 		oldAndModernWordList.add(new OldAndModern("thereon", "upon that"));
 		oldAndModernWordList.add(new OldAndModern("thereunto", "to that"));
 		oldAndModernWordList.add(new OldAndModern("thereinto", "into that"));
+		oldAndModernWordList.add(new OldAndModern("thine", "your"));
+		oldAndModernWordList.add(new OldAndModern("thou", "you"));
+		oldAndModernWordList.add(new OldAndModern("thy", "your"));
+		oldAndModernWordList.add(new OldAndModern("thyself", "yourself"));
+		oldAndModernWordList.add(new OldAndModern("wast", "were"));
 		oldAndModernWordList.add(new OldAndModern("wherein", "in which"));
 		oldAndModernWordList.add(new OldAndModern("whereof", "of which"));
 		oldAndModernWordList.add(new OldAndModern("wherewith", "with which"));
@@ -77,6 +95,8 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("whereunto", "to which"));
 		oldAndModernWordList.add(new OldAndModern("whereinto", "into which"));
 		oldAndModernWordList.add(new OldAndModern("whereby", "through which"));
+		oldAndModernWordList.add(new OldAndModern("whilst", "while"));
+		oldAndModernWordList.add(new OldAndModern("wilt", "will"));
 		oldAndModernWordList.add(new OldAndModern("unto", "to"));
 		oldAndModernWordList.add(new OldAndModern("hath", "has"));
 		
@@ -126,7 +146,7 @@ public class OldeEnglishModerniser {
 			String note = addNote && StringUtils.isNotEmpty(noteWord) ? "<note n=\""+noteWord+"\">Auto-modernized</note>" : "";
 			in = in.replaceAll("\\b"+old+"\\b", modern+note);
 			// if starts with a number then capitalize has no effect and replacement will be duplicated causing errors
-			if (!StringUtils.isNumeric(old.substring(0, 0))) {
+			if (!StringUtils.isNumeric(old.substring(0, 1))) {
 				in = in.replaceAll("\\b"+StringUtils.capitalize(old)+"\\b", StringUtils.capitalize(modern)+note);
 			}
 		}

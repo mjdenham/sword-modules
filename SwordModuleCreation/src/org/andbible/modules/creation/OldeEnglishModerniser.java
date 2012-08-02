@@ -108,6 +108,7 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("concernments", "concerns"));
 		oldAndModernWordList.add(new OldAndModern("intendment", "intention"));
 		oldAndModernWordList.add(new OldAndModern("supportment", "support"));
+		oldAndModernWordList.add(new OldAndModern("supportments", "supports"));
 		oldAndModernWordList.add(new OldAndModern("disquietment", "disquiet"));
 		oldAndModernWordList.add(new OldAndModern("furnishment", "furnishing"));
 		oldAndModernWordList.add(new OldAndModern("relinquishment", "relinquishing"));

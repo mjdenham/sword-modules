@@ -33,6 +33,9 @@ public class OldeEnglishModerniser {
 	private static List<OldAndModern> oldAndModernWordList;
 	
 	private static String[] REMOVE_ETH_ADD_S = new String[] {
+			"accepteth","adorneth","agreeth","answereth","appeareth","bestoweth","cheereth","commandeth","decketh","demandeth","descendeth","drinketh","eateth","effecteth","endeavoureth",
+			"excepteth","floweth","groweth","helpeth","imparteth","importeth","instructeth","killeth","layeth","leadeth","mentioneth","perverteth","readeth","redoundeth","repenteth",
+			"retaineth","revealeth","sealeth","sendeth","slayeth","spreadeth","strengtheneth","telleth","treateth","walketh","wanteth","willeth","withereth",
 			"administereth","beareth","belongeth","claspeth","comforteth","concerneth","constraineth","consumeth","containeth","delighteth","denoteth","fainteth","falleth","followeth",
 			"hasteneth","joyeth","knoweth","lighteth","rejecteth","reneweth","resteth","soaketh","showeth","trusteth","worketh","manifesteth","comprehendeth","profiteth","exhibiteth",
 			"dwelleth","festereth","fighteth","lusteth","melteth","inhabiteth",
@@ -43,6 +46,10 @@ public class OldeEnglishModerniser {
 		};
 	
 	private static String[] REMOVE_ETH_ADD_ES = new String[] {
+			"applieth","approveth","argueth","awaketh","balanceth","blesseth","careth","chastiseth","cherisheth","cleanseth","closeth","concludeth","countenanceth","crieth","deriveth",
+			"despiseth","dispenseth","distributeth","divideth","easeth","fancieth","frameth","furnisheth","hateth","infuseth","intercedeth","interposeth","intimateth","inviteth",
+			"manageth","nourisheth","peruseth","phraseth","possesseth","praiseth","preacheth","precedeth","prizeth","procureth","pronounceth","publisheth","renounceth","reproveth",
+			"rideth","saveth","seeth","traduceth","transcribeth","trieth","useth","vanisheth","watcheth","witnesseth","writeth",
 			"amazeth","ariseth","chooseth","cometh","confesseth","continueth","declareth","desireth","dieth","discourseth","distinguisheth","doeth","embraceth","fixeth","goeth",
 			"perplexeth","presseth","produceth","professeth","purgeth","rejoiceth","requireth","urgeth","perisheth","lieth","receiveth","conduceth","taketh",
 			"passeth","maketh","shineth","expresseth","reproacheth","loveth","liveth","abideth","humbleth","causeth","giveth","loseth","testifieth","becometh",
@@ -53,18 +60,20 @@ public class OldeEnglishModerniser {
 			"exerciseth","exposeth","insinuateth","judgeth","leaveth","pitieth","placeth","proveth","raiseth","reacheth","searcheth","settleth","sufficeth","supposeth",
 		};
 
-	
 	static {
 		oldAndModernWordList = new ArrayList<OldAndModern>();
 		oldAndModernWordList.add(new OldAndModern("howbeit", "nevertheless"));
 		oldAndModernWordList.add(new OldAndModern("saith", "says"));
 		oldAndModernWordList.add(new OldAndModern("art", "are"));
+		oldAndModernWordList.add(new OldAndModern("blotteth", "blots"));
 		oldAndModernWordList.add(new OldAndModern("canst", "can"));
 		oldAndModernWordList.add(new OldAndModern("complainest", "complain"));
 		oldAndModernWordList.add(new OldAndModern("didst", "did"));
 		oldAndModernWordList.add(new OldAndModern("doth", "does"));
+		oldAndModernWordList.add(new OldAndModern("excelleth", "excels"));
 		oldAndModernWordList.add(new OldAndModern("fearest", "fear"));
 		oldAndModernWordList.add(new OldAndModern("fellest", "fell"));
+		oldAndModernWordList.add(new OldAndModern("getteth", "gets"));
 		oldAndModernWordList.add(new OldAndModern("hadst", "have"));
 		oldAndModernWordList.add(new OldAndModern("hast", "have"));
 		oldAndModernWordList.add(new OldAndModern("herein", "in this"));
@@ -73,9 +82,11 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("hereon", "upon this"));
 		oldAndModernWordList.add(new OldAndModern("hereunto", "to this"));
 		oldAndModernWordList.add(new OldAndModern("knowest", "know"));
+		oldAndModernWordList.add(new OldAndModern("letteth", "lets"));
 		oldAndModernWordList.add(new OldAndModern("livest", "live"));
 		oldAndModernWordList.add(new OldAndModern("mayst", "may"));
 		oldAndModernWordList.add(new OldAndModern("needest", "need"));
+		oldAndModernWordList.add(new OldAndModern("omitteth", "omits"));
 		oldAndModernWordList.add(new OldAndModern("thee", "you"));
 		oldAndModernWordList.add(new OldAndModern("therein", "in that"));
 		oldAndModernWordList.add(new OldAndModern("thereof", "of that"));
@@ -188,7 +199,12 @@ public class OldeEnglishModerniser {
 		}
 		wordETHSet.removeAll(Arrays.asList(REMOVE_ETH_ADD_ES));
 		wordETHSet.removeAll(Arrays.asList(REMOVE_ETH_ADD_S));
+		wordETHSet.remove("blotteth");
 		wordETHSet.remove("committeth");
+		wordETHSet.remove("excelleth");
+		wordETHSet.remove("getteth");
+		wordETHSet.remove("letteth");
+		wordETHSet.remove("omitteth");
 		wordETHSet.remove("putteth");
 		wordETHSet.remove("sinneth");
 		wordETHSet.remove("sitteth");

@@ -123,6 +123,7 @@ public class OldeEnglishModerniser {
 		oldAndModernWordList.add(new OldAndModern("disquietment", "disquiet"));
 		oldAndModernWordList.add(new OldAndModern("furnishment", "furnishing"));
 		oldAndModernWordList.add(new OldAndModern("relinquishment", "relinquishing"));
+		oldAndModernWordList.add(new OldAndModern("acceptation", "acceptance"));
 		
 		oldAndModernWordList.add(new OldAndModern("especial", "special"));
 		oldAndModernWordList.add(new OldAndModern("an special", "a special")); // fix up previous replacement

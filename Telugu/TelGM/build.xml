@@ -1,0 +1,38 @@
+<project name="Build TelGM" basedir="." default="main">
+
+	<property name="build.dir"   value="../build"/>
+    <property name="module.dir"  value="modules/texts/ztext/telgm"/>
+	<property name="mods.d.dir" value="mods.d"/>
+
+	<property name="distribution.dir"  value="${build.dir}/distribution"/>
+
+	<property environment="env" />
+
+	<property name="module.name"     value="TelGM"/>
+	<property name="module.name.lower" value="telgm"/>
+	<property name="module.zipfile"  value="${module.name}.zip"/>
+	<property name="sword.module.folder" value="modules/texts/ztext/${module.name.lower}"/>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${distribution.dir}"/>
+	</target>
+	<!--
+    	To create a compressed one I do: 
+    	        mkdir -p modules/texts/ztext/kjv2006 
+    	        osis2mod modules/texts/ztext/kjv2006 kjv.xml 0 2 4 
+    	        zip kjv2006.zip mods.d/kjv2006.conf modules/texts/ztext/kjv2006/*
+    	        http://sword-dev.350566.n4.nabble.com/Create-a-module-Where-is-xml2gbs-td351447.html 
+-->
+
+	<target name="zip-module">
+		<zip destfile="${distribution.dir}/${module.zipfile}" filesonly="true">
+			<zipfileset dir="${module.dir}" prefix="${sword.module.folder}"/>
+			<zipfileset dir="${mods.d.dir}" prefix="mods.d"/>
+		</zip>
+	</target>
+
+	<target name="main" depends="clean, zip-module"/>
+
+</project>

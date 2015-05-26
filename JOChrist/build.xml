@@ -15,8 +15,8 @@
 	<property name="lib.dir"     value="libs"/>
 	<property name="andbible.lib.dir"  value="../../and-bible/AndBible/libs"/>
 	
-	<property name="xml2gbs"     location="C:/Program Files/CrossWire/sword-utilities-1.6.2/xml2gbs"/>
-	<property name="adb"     location="C:/datafiles/android-sdk-windows/platform-tools/adb"/>
+	<property name="xml2gbs"     location="/usr/bin/xml2gbs"/>
+	<property name="adb"     location="/opt/android-sdk-linux/platform-tools/adb"/>
 
 	<path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
@@ -82,12 +82,12 @@
 	<target name="adb-push">
 		<exec executable="${adb}">
 			<arg value="push"/>
-			<arg path="/datafiles/andbib/projects4/sword-modules/${module.name}/build/module/" />
+			<arg path="/home/martin/dev/eclipse-workspaces/abws/sword-modules/${module.name}/build/module" />
 			<arg value="/mnt/sdcard/jsword/modules/genbook/rawgenbook/${module.name.lower}"/>
 		</exec>
 		<exec executable="${adb}">
 			<arg value="push"/>
-			<arg path="/datafiles/andbib/projects4/sword-modules/${module.name}/module/mods.d/${module.name.lower}.conf" />
+			<arg path="/home/martin/dev/eclipse-workspaces/abws/sword-modules/${module.name}/module/mods.d/${module.name.lower}.conf" />
 			<arg value="/mnt/sdcard/jsword/mods.d"/>
 		</exec>
 	</target>
